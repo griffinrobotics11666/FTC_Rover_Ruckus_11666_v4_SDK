@@ -34,9 +34,10 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.util.ElapsedTime;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
 @TeleOp(name="Sample Op CRSERVO", group="SAMPLE OPMODES")
-//@Disabled
+@Disabled
 public class SampleOpMode_CRSERVO extends LinearOpMode {
 
     // Declare OpMode members.

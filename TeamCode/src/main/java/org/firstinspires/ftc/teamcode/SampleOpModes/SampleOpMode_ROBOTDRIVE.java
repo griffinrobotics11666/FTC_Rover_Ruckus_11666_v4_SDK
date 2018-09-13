@@ -37,7 +37,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
 @TeleOp(name="Sample Op ROBOT DRIVE", group="SAMPLE OPMODES")
-//@Disabled
+@Disabled
 public class SampleOpMode_ROBOTDRIVE extends LinearOpMode {
 
     // Declare OpMode members.

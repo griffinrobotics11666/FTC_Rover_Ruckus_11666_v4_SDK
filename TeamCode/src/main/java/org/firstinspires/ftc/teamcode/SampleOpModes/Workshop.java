@@ -3,6 +3,8 @@ package org.firstinspires.ftc.teamcode.SampleOpModes;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
+@Disabled
 public class Workshop extends OpMode {
 
     DcMotor left;

@@ -1,5 +1,10 @@
 package org.firstinspires.ftc.teamcode.Util;
 
+
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
+
+@Disabled
+
 public class RobotConstants {
     private final double WHEEL_DIAMETER = 4;
     private final double WHEEL_CIRCUMFERENCE = Math.PI * WHEEL_DIAMETER;

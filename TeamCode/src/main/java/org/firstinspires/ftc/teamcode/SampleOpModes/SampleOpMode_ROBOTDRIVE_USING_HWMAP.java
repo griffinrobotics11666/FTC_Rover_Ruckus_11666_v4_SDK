@@ -33,9 +33,10 @@ import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.Range;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
 @TeleOp(name="Sample Op ROB DR USING HWMAP", group="SAMPLE OPMODES")
-//@Disabled
+@Disabled
 public class SampleOpMode_ROBOTDRIVE_USING_HWMAP extends LinearOpMode {
 
     // Declare OpMode members.

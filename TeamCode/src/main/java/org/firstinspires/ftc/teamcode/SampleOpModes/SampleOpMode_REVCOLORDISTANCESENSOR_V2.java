@@ -53,7 +53,7 @@ import java.util.Locale;
  * Remove or comment out the @Disabled line to add this opmode to the Driver Station OpMode list.
  */
 @TeleOp(name = "Sample Op REV Color / ODS Sensor", group = "SAMPLE OPMODES")
-//@Disabled                            // Comment this out to add to the opmode list
+@Disabled                            // Comment this out to add to the opmode list
 public class SampleOpMode_REVCOLORDISTANCESENSOR_V2 extends LinearOpMode {
 
     /**

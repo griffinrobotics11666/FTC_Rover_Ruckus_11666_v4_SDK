@@ -35,6 +35,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
 
 
+@Disabled
 @TeleOp(name="Sample Op BUTTON", group="SAMPLE OPMODES")
 //@Disabled
 public class SampleOpMode_BUTTON extends LinearOpMode {
