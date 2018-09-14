@@ -7,7 +7,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 @TeleOp(name="Driver Control", group="Competition")
 @Disabled
-public class driverControl extends LinearOpMode
+public class DriverControl extends LinearOpMode
 {
     private ElapsedTime runtime = new ElapsedTime();
     // Declare variables
