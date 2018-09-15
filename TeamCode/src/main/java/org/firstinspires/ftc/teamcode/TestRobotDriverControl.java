@@ -24,7 +24,7 @@ public class TestRobotDriverControl extends LinearOpMode
     private double topSpeed = .5;
     private Servo servo = null;
     private double servoHomePosition = 0.5;
-    private double servoDropPosition = 0;
+    private double servoDropPosition = 0.0;
     private boolean ishome = true;
 
     @Override
@@ -33,13 +33,16 @@ public class TestRobotDriverControl extends LinearOpMode
         //map hardware variables to hardware map
         leftDrive  = hardwareMap.get(DcMotor.class, "motor_1");
         rightDrive = hardwareMap.get(DcMotor.class, "motor_2");
+        servo  = hardwareMap.get(Servo.class, "servo_1");
 
         leftDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         rightDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        servo  = hardwareMap.get(Servo.class, "servo_1");
-        servo.setPosition(servoHomePosition);
         leftDrive.setDirection(DcMotor.Direction.FORWARD);
         rightDrive.setDirection(DcMotor.Direction.REVERSE);
+
+        servo.setPosition(servoHomePosition);
+
+
 
         // Wait for the game to start (driver presses PLAY)
         waitForStart();
@@ -52,7 +55,7 @@ public class TestRobotDriverControl extends LinearOpMode
             {
                 servo.setPosition(servoDropPosition);
                 ishome = false;
-                sleep(300);
+                sleep(300); //button delay time
             }
             if (gamepad1.a && !ishome)
             {
