@@ -35,15 +35,13 @@ import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
-@Disabled
+//@Disabled
 
 public class HardwareSampleBot
 {
     /* Public OpMode members. */
     public DcMotor  leftDrive   = null;
     public DcMotor  rightDrive  = null;
-    public Servo    leftServo   = null;
-    public Servo    rightServo  = null;
     /* Local OpMode members. */
     HardwareMap hwMap  = null;  //object that stores the hardware map?
     public ElapsedTime period  = new ElapsedTime();
@@ -60,10 +58,9 @@ public class HardwareSampleBot
         // Define and Initialize Motors
         leftDrive  = hwMap.get(DcMotor.class, "motor_1");
         rightDrive = hwMap.get(DcMotor.class, "motor_2");
-        leftServo = hwMap.get(Servo.class, "servo_1");
-        rightServo = hwMap.get(Servo.class, "servo_2");
-        leftDrive.setDirection(DcMotor.Direction.REVERSE);
-        rightDrive.setDirection(DcMotor.Direction.FORWARD);
+
+        leftDrive.setDirection(DcMotor.Direction.FORWARD);
+        rightDrive.setDirection(DcMotor.Direction.REVERSE);
 
         // Set all motors to zero power
         leftDrive.setPower(0);
@@ -74,8 +71,6 @@ public class HardwareSampleBot
         leftDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         rightDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
-        // Set servo Positions
-        leftServo.setPosition(0.5);
-        rightServo.setPosition(0.5);
+
     }
 }

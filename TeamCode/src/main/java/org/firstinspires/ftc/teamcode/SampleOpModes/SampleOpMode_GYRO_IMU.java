@@ -42,7 +42,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.Velocity;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
 @TeleOp(name = "Sample Op GYRO", group = "SAMPLE OPMODES")
-@Disabled                            // Comment this out to add to the opmode list
+//@Disabled                            // Comment this out to add to the opmode list
 public class SampleOpMode_GYRO_IMU extends LinearOpMode
     {
 
