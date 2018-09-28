@@ -1,11 +1,23 @@
 package org.firstinspires.ftc.teamcode;
 
+
+
+import com.qualcomm.hardware.bosch.BNO055IMU;
+import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+
+import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
+import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
+import org.firstinspires.ftc.robotcore.external.navigation.Position;
+import org.firstinspires.ftc.robotcore.external.navigation.Velocity;
 import org.firstinspires.ftc.teamcode.Util.TestRobotConstants;
 
 public class HardwareTestRobot
@@ -15,13 +27,16 @@ public class HardwareTestRobot
     public  Servo servo = null;
     public boolean ishome = true;
     public double servoHomePosition = 0.5;
+    BNO055IMU imu;
+    Orientation angles;
     HardwareMap hwMap  = null;
+    Telemetry telemetry;
 
     TestRobotConstants constants = new TestRobotConstants();
 
 
-    public HardwareTestRobot() {
-
+    public HardwareTestRobot(Telemetry telemetry) {
+        this.telemetry = telemetry;
     }
 
 
@@ -31,6 +46,7 @@ public class HardwareTestRobot
         leftDrive  = hwMap.get(DcMotor.class, "motor_1");
         rightDrive = hwMap.get(DcMotor.class, "motor_2");
         servo = hwMap.get(Servo.class, "servo_1");
+        imu = hwMap.get(BNO055IMU.class, "imu");
         //set motor direction
         leftDrive.setDirection(DcMotor.Direction.FORWARD);
         rightDrive.setDirection(DcMotor.Direction.REVERSE);
@@ -40,12 +56,25 @@ public class HardwareTestRobot
         //set servo to initial position
         servo.setPosition(servoHomePosition);
 
+        //Gyro
+
+
+        BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
+        parameters.angleUnit           = BNO055IMU.AngleUnit.DEGREES;
+        parameters.calibrationDataFile = "BNO055IMUCalibration.json";
+        parameters.loggingEnabled      = true;
+        parameters.loggingTag          = "IMU";
+        parameters.accelerationIntegrationAlgorithm = new JustLoggingAccelerationIntegrator();
+        imu = hwMap.get(BNO055IMU.class, "imu");
+        imu.initialize(parameters);
+
+
 
         //TODO
         /*
         Methods added to Hardware Map
         Raise and lower servo
-        Encoder Drive
+        Encoder Drive (DONE)
         Gyro turn
          */
 
@@ -82,6 +111,70 @@ public class HardwareTestRobot
 
         leftDrive.setPower(0);
         rightDrive.setPower(0);
+
+    }
+    public void turn(double angle, double speed)
+    {
+
+        
+        /*
+        while (true)
+        {
+            angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+            telemetry.addData("roll: ", angles.firstAngle);
+            telemetry.update();
+        }
+        */
+
+
+
+//        double targetAngle;
+//        angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+//        float initialAngle = angles.firstAngle;
+//        targetAngle = initialAngle + angle;
+//
+//
+//
+//
+//        while (Math.abs(targetAngle - angles.firstAngle)>0.05 )
+//        {
+//
+//            if (angle > 0) {
+//                leftDrive.setPower(-speed);
+//                rightDrive.setPower(speed);
+//            } else {
+//                leftDrive.setPower(speed);
+//                rightDrive.setPower(-speed);
+//            }
+//        }
+//        leftDrive.setPower(0);
+//        rightDrive.setPower(0);
+
+
+        /*
+        Vo Code
+        if (angle > 0)
+        {
+            leftDrive.setPower(-speed);
+            rightDrive.setPower(speed);
+        }
+        else{
+            leftDrive.setPower(speed);
+            rightDrive.setPower(-speed);
+        }
+
+        if (targetAngle == angles.firstAngle)
+        {
+            leftDrive.setPower(0);
+            rightDrive.setPower(0);
+
+        }
+        while (leftDrive.isBusy() || rightDrive.isBusy())
+        {
+
+        }
+        */
+
 
     }
 
