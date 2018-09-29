@@ -15,6 +15,7 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
+import org.firstinspires.ftc.robotcore.external.navigation.Axis;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.robotcore.external.navigation.Position;
 import org.firstinspires.ftc.robotcore.external.navigation.Velocity;
@@ -50,6 +51,10 @@ public class HardwareTestRobot
         //set motor direction
         leftDrive.setDirection(DcMotor.Direction.FORWARD);
         rightDrive.setDirection(DcMotor.Direction.REVERSE);
+
+        leftDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        rightDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
         //set motor power
         leftDrive.setPower(0);
         rightDrive.setPower(0);
@@ -81,10 +86,25 @@ public class HardwareTestRobot
 
     }
 
+    public void stopRobot()
+    {
+        leftDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        rightDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+        leftDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        rightDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+        leftDrive.setPower(0);
+        rightDrive.setPower(0);
+    }
+
     public void move(double distance, double speed)
     {
         int newLeftDriveTarget;
         int newRightDriveTarget;
+
+        leftDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        rightDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         leftDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         rightDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -109,12 +129,115 @@ public class HardwareTestRobot
         while (leftDrive.isBusy() || rightDrive.isBusy())
         {}
 
-        leftDrive.setPower(0);
-        rightDrive.setPower(0);
+        stopRobot();
+
 
     }
     public void turn(double angle, double speed)
     {
+        leftDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        rightDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        leftDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        rightDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+
+        double initalAngle = angles.firstAngle;
+        double motorPower;
+        double minMotorPower = 0.2;
+        double powerScaleFactor;
+        double targetAngle;
+        double currentAngle;
+        double deltaAngle;
+        double robotAngle = angles.firstAngle;
+        double previousAngle = angles.firstAngle;
+
+        targetAngle = initalAngle + angle;
+
+        //TODO change this to deal with over corrections (hint: change the if angle > 0 part!)
+        while (Math.abs(targetAngle - robotAngle)> .1)
+        {
+            angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+            currentAngle = angles.firstAngle;
+
+            //update speed dynamically to slow when approaching the target
+            powerScaleFactor = Math.abs(targetAngle-robotAngle)/angle;
+            motorPower = powerScaleFactor*speed;
+            if (motorPower < minMotorPower)
+            {
+                motorPower = minMotorPower;
+            }
+
+            //determine which direction the robot should turn
+
+
+
+            if (angle > 0) {
+                leftDrive.setPower(-motorPower);
+                rightDrive.setPower(motorPower);
+            } else {
+                leftDrive.setPower(motorPower);
+                rightDrive.setPower(-motorPower);
+            }
+
+
+            //define how the angle is changing and deal with the stupid 180 -> -180 thing
+            deltaAngle = currentAngle - previousAngle;
+            if (deltaAngle > 180)
+            {
+                deltaAngle -= 360;
+            }
+            else if(deltaAngle < -180)
+            {
+                deltaAngle += 360;
+            }
+
+            robotAngle += deltaAngle;
+            previousAngle = currentAngle;
+
+            telemetry.addData("robotangle", robotAngle);
+            telemetry.addData("deltaAngle", deltaAngle);
+            telemetry.addData("currentAngle", currentAngle);
+
+            telemetry.update();
+
+        }
+        stopRobot();
+
+            /*
+            if (angle > 0) {
+                leftDrive.setPower(-speed);
+                rightDrive.setPower(speed);
+            } else {
+                leftDrive.setPower(speed);
+                rightDrive.setPower(-speed);
+            }
+            if (Math.abs(targetAngle - angles.firstAngle)<0.5)
+            {
+                leftDrive.setPower(0);
+                rightDrive.setPower(0);
+
+            }
+            */
+
+            /*
+            boolean reachedAngle = false;
+            angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+
+            telemetry.addData("roll: ", angles.firstAngle);
+
+            telemetry.addData("target", angle);
+
+            if(Math.abs(angles.firstAngle) > Math.abs(angle))
+            {
+                leftDrive.setPower(0);
+                rightDrive.setPower(0);
+                reachedAngle = true;
+            }
+            telemetry.addData("Reached Target:" , reachedAngle);
+
+
+        telemetry.update();
+        */
 
 
         /*

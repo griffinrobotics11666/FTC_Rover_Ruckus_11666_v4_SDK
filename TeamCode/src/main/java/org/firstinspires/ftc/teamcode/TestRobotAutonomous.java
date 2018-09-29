@@ -49,19 +49,19 @@ public class TestRobotAutonomous extends LinearOpMode {
         robot.imu.startAccelerationIntegration(new Position(), new Velocity(), 1000);
 
         //Do stuff
-        //robot.move(24,.4);
-        robot.turn(90,.5);
+        robot.move(24,.4);
+        sleep(1000);
+        robot.turn(90,.7);
+        sleep(1000);
+        robot.turn(90,.7);
+        sleep(1000);
+        robot.turn(90,.7);
+        sleep(1000);
+        robot.turn(90, .7);
+
 
 
     }
-    public void turn()
-    {
-        while(opModeIsActive()) {
 
-
-
-
-        }
-    }
 
 }

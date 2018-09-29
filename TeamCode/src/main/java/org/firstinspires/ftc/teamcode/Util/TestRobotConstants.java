@@ -9,7 +9,7 @@ public class TestRobotConstants {
 
     private final double WHEEL_DIAMETER = 4;
     private final double WHEEL_CIRCUMFERENCE = Math.PI * WHEEL_DIAMETER;
-    private final double GEAR_RATIO = 10/9;
+    private final double GEAR_RATIO = 1;
     private final double FUDGE_FACTOR = 1;
 
 
