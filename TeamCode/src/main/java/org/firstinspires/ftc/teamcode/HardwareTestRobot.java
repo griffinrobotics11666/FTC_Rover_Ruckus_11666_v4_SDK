@@ -6,6 +6,7 @@ import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -26,6 +27,7 @@ public class HardwareTestRobot
     public DcMotor leftDrive = null;
     public DcMotor rightDrive = null;
     public  Servo servo = null;
+    public DistanceSensor sensorRange;
     public boolean ishome = true;
     public double servoHomePosition = 0.5;
     BNO055IMU imu;
@@ -46,6 +48,8 @@ public class HardwareTestRobot
         // assign devices to config
         leftDrive  = hwMap.get(DcMotor.class, "motor_1");
         rightDrive = hwMap.get(DcMotor.class, "motor_2");
+        sensorRange = hwMap.get(DistanceSensor.class, "sensor_range");
+
         servo = hwMap.get(Servo.class, "servo_1");
         imu = hwMap.get(BNO055IMU.class, "imu");
         //set motor direction
@@ -79,8 +83,6 @@ public class HardwareTestRobot
         /*
         Methods added to Hardware Map
         Raise and lower servo
-        Encoder Drive (DONE)
-        Gyro turn
          */
 
 
@@ -171,7 +173,7 @@ public class HardwareTestRobot
 
 
 
-            if (angle > 0) {
+            if ((targetAngle - robotAngle) > 0) {
                 leftDrive.setPower(-motorPower);
                 rightDrive.setPower(motorPower);
             } else {
@@ -202,103 +204,6 @@ public class HardwareTestRobot
 
         }
         stopRobot();
-
-            /*
-            if (angle > 0) {
-                leftDrive.setPower(-speed);
-                rightDrive.setPower(speed);
-            } else {
-                leftDrive.setPower(speed);
-                rightDrive.setPower(-speed);
-            }
-            if (Math.abs(targetAngle - angles.firstAngle)<0.5)
-            {
-                leftDrive.setPower(0);
-                rightDrive.setPower(0);
-
-            }
-            */
-
-            /*
-            boolean reachedAngle = false;
-            angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
-
-            telemetry.addData("roll: ", angles.firstAngle);
-
-            telemetry.addData("target", angle);
-
-            if(Math.abs(angles.firstAngle) > Math.abs(angle))
-            {
-                leftDrive.setPower(0);
-                rightDrive.setPower(0);
-                reachedAngle = true;
-            }
-            telemetry.addData("Reached Target:" , reachedAngle);
-
-
-        telemetry.update();
-        */
-
-
-        /*
-        while (true)
-        {
-            angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
-            telemetry.addData("roll: ", angles.firstAngle);
-            telemetry.update();
-        }
-        */
-
-
-
-//        double targetAngle;
-//        angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
-//        float initialAngle = angles.firstAngle;
-//        targetAngle = initialAngle + angle;
-//
-//
-//
-//
-//        while (Math.abs(targetAngle - angles.firstAngle)>0.05 )
-//        {
-//
-//            if (angle > 0) {
-//                leftDrive.setPower(-speed);
-//                rightDrive.setPower(speed);
-//            } else {
-//                leftDrive.setPower(speed);
-//                rightDrive.setPower(-speed);
-//            }
-//        }
-//        leftDrive.setPower(0);
-//        rightDrive.setPower(0);
-
-
-        /*
-        Vo Code
-        if (angle > 0)
-        {
-            leftDrive.setPower(-speed);
-            rightDrive.setPower(speed);
-        }
-        else{
-            leftDrive.setPower(speed);
-            rightDrive.setPower(-speed);
-        }
-
-        if (targetAngle == angles.firstAngle)
-        {
-            leftDrive.setPower(0);
-            rightDrive.setPower(0);
-
-        }
-        while (leftDrive.isBusy() || rightDrive.isBusy())
-        {
-
-        }
-        */
-
-
     }
 
 }

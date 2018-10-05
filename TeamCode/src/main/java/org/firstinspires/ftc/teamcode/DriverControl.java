@@ -1,6 +1,5 @@
 package org.firstinspires.ftc.teamcode;
 
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -8,14 +7,13 @@ import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
-@TeleOp(name="Test Driver Control", group="Competition")
+@TeleOp(name="Driver Control", group="Competition")
 //@Disabled
-public class TestRobotDriverControl extends LinearOpMode
+public class DriverControl extends LinearOpMode
 {
+    HardwareRobot robot = new HardwareRobot(telemetry);
     private ElapsedTime runtime = new ElapsedTime();
     // Declare variables
-    private DcMotor leftDrive = null;
-    private DcMotor rightDrive = null;
     private double speedRight;
     private double speedLeft;
     private double drive;
@@ -26,21 +24,13 @@ public class TestRobotDriverControl extends LinearOpMode
     private double servoHomePosition = 0.5;
     private double servoDropPosition = 0.0;
     private boolean ishome = true;
+    private double strafe = gamepad1.right_stick_x;
 
     @Override
     public void runOpMode()
     {
         //map hardware variables to hardware map
-        leftDrive  = hardwareMap.get(DcMotor.class, "motor_1");
-        rightDrive = hardwareMap.get(DcMotor.class, "motor_2");
-        servo  = hardwareMap.get(Servo.class, "servo_1");
-
-        leftDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        rightDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        leftDrive.setDirection(DcMotor.Direction.FORWARD);
-        rightDrive.setDirection(DcMotor.Direction.REVERSE);
-
-        servo.setPosition(servoHomePosition);
+        robot.init(hardwareMap);
 
 
 
@@ -77,14 +67,20 @@ public class TestRobotDriverControl extends LinearOpMode
             {
                 maxSpeed = topSpeed;
             }
+            robot.rightFront.setPower(-strafe);
+            robot.leftFront.setPower(-strafe);
+            robot.leftBack.setPower(strafe);
+            robot.rightBack.setPower(strafe);
 
             //RANGE CLIP
             speedLeft = Range.clip(drive + turn, -maxSpeed, maxSpeed);
             speedRight = Range.clip(drive - turn, -maxSpeed, maxSpeed);
 
             //set motor speed
-            leftDrive.setPower(speedLeft);
-            rightDrive.setPower(speedRight);
+            robot.leftFront.setPower(speedLeft);
+            robot.rightFront.setPower(speedRight);
+            robot.rightBack.setPower(speedRight);
+            robot.leftBack.setPower(speedLeft);
 
             telemetry.addData("Status", "Run Time: " + runtime.toString());
             telemetry.update();
