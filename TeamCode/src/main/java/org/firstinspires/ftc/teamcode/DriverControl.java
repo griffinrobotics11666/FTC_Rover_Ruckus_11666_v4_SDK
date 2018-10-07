@@ -14,17 +14,19 @@ public class DriverControl extends LinearOpMode
     HardwareRobot robot = new HardwareRobot(telemetry);
     private ElapsedTime runtime = new ElapsedTime();
     // Declare variables
-    private double speedRight;
-    private double speedLeft;
+    private double speedRightFront;
+    private double speedLeftFront;
+    private double speedRightBack;
+    private double speedLeftBack;
     private double drive;
     private double turn;
     private double maxSpeed;
     private double topSpeed = .5;
-    private Servo servo = null;
+    //private Servo servo = null;
     private double servoHomePosition = 0.5;
     private double servoDropPosition = 0.0;
     private boolean ishome = true;
-    private double strafe = gamepad1.right_stick_x;
+    private double strafe;
 
     @Override
     public void runOpMode()
@@ -41,6 +43,7 @@ public class DriverControl extends LinearOpMode
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive())
         {
+            /*
             if (gamepad1.a && ishome)
             {
                 servo.setPosition(servoDropPosition);
@@ -53,10 +56,12 @@ public class DriverControl extends LinearOpMode
                 ishome = true;
                 sleep(300);
             }
+            */
 
             //gamepad values
             drive = -gamepad1.left_stick_y;
             turn = gamepad1.left_stick_x;
+            strafe = gamepad1.right_stick_x;
 
             //toggle speed for fine adjustment
             if (gamepad1.right_bumper)
@@ -67,20 +72,20 @@ public class DriverControl extends LinearOpMode
             {
                 maxSpeed = topSpeed;
             }
-            robot.rightFront.setPower(-strafe);
-            robot.leftFront.setPower(-strafe);
-            robot.leftBack.setPower(strafe);
-            robot.rightBack.setPower(strafe);
+            //TODO When right, forward forward backward backward
 
             //RANGE CLIP
-            speedLeft = Range.clip(drive + turn, -maxSpeed, maxSpeed);
-            speedRight = Range.clip(drive - turn, -maxSpeed, maxSpeed);
+            speedLeftFront = Range.clip(drive + turn + strafe, -maxSpeed, maxSpeed);
+            speedRightFront = Range.clip(drive - turn + strafe, -maxSpeed, maxSpeed);
+            speedLeftBack = Range.clip(drive + turn - strafe, -maxSpeed, maxSpeed);
+            speedRightBack = Range.clip(drive - turn - strafe, -maxSpeed, maxSpeed);
+
 
             //set motor speed
-            robot.leftFront.setPower(speedLeft);
-            robot.rightFront.setPower(speedRight);
-            robot.rightBack.setPower(speedRight);
-            robot.leftBack.setPower(speedLeft);
+            robot.leftFront.setPower(speedLeftFront);
+            robot.rightFront.setPower(speedRightFront);
+            robot.rightBack.setPower(speedRightBack);
+            robot.leftBack.setPower(speedLeftBack);
 
             telemetry.addData("Status", "Run Time: " + runtime.toString());
             telemetry.update();

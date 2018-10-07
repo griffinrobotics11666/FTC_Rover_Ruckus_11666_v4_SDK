@@ -25,7 +25,7 @@ public class HardwareRobot {
     public DcMotor leftBack = null;
     public DcMotor rightFront = null;
     public DcMotor rightBack = null;
-    public  Servo servo = null;
+    //public  Servo servo = null;
     public boolean ishome = true;
     public double servoHomePosition = 0.5;
     BNO055IMU imu;
@@ -50,9 +50,9 @@ public class HardwareRobot {
         /* servo = hwMap.get(Servo.class, "servo_1");
         imu = hwMap.get(BNO055IMU.class, "imu");
         //set motor direction*/
-        leftFront.setDirection(DcMotor.Direction.FORWARD);
+        leftFront.setDirection(DcMotor.Direction.REVERSE);
         rightFront.setDirection(DcMotor.Direction.FORWARD);
-        rightBack.setDirection(DcMotor.Direction.REVERSE);
+        rightBack.setDirection(DcMotor.Direction.FORWARD);
         leftBack.setDirection(DcMotor.Direction.REVERSE);
 
         leftFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
