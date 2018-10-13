@@ -81,7 +81,7 @@ public class SensorREV2mDistance extends LinearOpMode {
             // Rev2mDistanceSensor specific methods.
             telemetry.addData("ID", String.format("%x", sensorTimeOfFlight.getModelID()));
             telemetry.addData("did time out", Boolean.toString(sensorTimeOfFlight.didTimeoutOccur()));
-
+            sensorRange.getDistance(DistanceUnit.INCH);
             telemetry.update();
         }
     }

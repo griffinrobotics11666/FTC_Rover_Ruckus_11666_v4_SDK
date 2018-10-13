@@ -21,7 +21,7 @@ public class DriverControl extends LinearOpMode
     private double drive;
     private double turn;
     private double maxSpeed;
-    private double topSpeed = .5;
+    private double topSpeed = 1;
     //private Servo servo = null;
     private double servoHomePosition = 0.5;
     private double servoDropPosition = 0.0;
@@ -66,13 +66,14 @@ public class DriverControl extends LinearOpMode
             //toggle speed for fine adjustment
             if (gamepad1.right_bumper)
             {
-                maxSpeed = topSpeed /2;
+                maxSpeed = topSpeed /3;
             }
             else
             {
                 maxSpeed = topSpeed;
             }
             //TODO When right, forward forward backward backward
+            //TODO increase top speed.
 
             //RANGE CLIP
             speedLeftFront = Range.clip(drive + turn + strafe, -maxSpeed, maxSpeed);

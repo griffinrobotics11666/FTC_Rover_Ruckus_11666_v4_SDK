@@ -4,6 +4,8 @@ import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.DistanceSensor;
+import com.qualcomm.hardware.rev.Rev2mDistanceSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -14,6 +16,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.Axis;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.robotcore.external.navigation.Position;
 import org.firstinspires.ftc.robotcore.external.navigation.Velocity;
@@ -25,6 +28,11 @@ public class HardwareRobot {
     public DcMotor leftBack = null;
     public DcMotor rightFront = null;
     public DcMotor rightBack = null;
+
+    double distance;
+
+    public DistanceSensor sensorRange;
+    //Rev2mDistanceSensor sensorTimeOfFlight = (Rev2mDistanceSensor)sensorRange;
     //public  Servo servo = null;
     public boolean ishome = true;
     public double servoHomePosition = 0.5;
@@ -47,8 +55,9 @@ public class HardwareRobot {
         leftBack = hwMap.get(DcMotor.class, "motor_2");
         rightBack = hwMap.get(DcMotor.class, "motor_3");
         rightFront = hwMap.get(DcMotor.class, "motor_4");
+        sensorRange = hwMap.get(DistanceSensor.class, "sensor_range");
+
         /* servo = hwMap.get(Servo.class, "servo_1");
-        imu = hwMap.get(BNO055IMU.class, "imu");
         //set motor direction*/
         leftFront.setDirection(DcMotor.Direction.REVERSE);
         rightFront.setDirection(DcMotor.Direction.FORWARD);
@@ -222,5 +231,15 @@ public class HardwareRobot {
 
         }
         stopRobot();
+    }
+    public double getDistance(){
+        int count = 10;
+
+        for (int i = 0; i < count ; i++) {
+            distance =+ sensorRange.getDistance(DistanceUnit.INCH);
+        }
+        distance = distance / count;
+
+        return distance;
     }
 }

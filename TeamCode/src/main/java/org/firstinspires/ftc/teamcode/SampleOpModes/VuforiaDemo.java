@@ -25,8 +25,10 @@ public class VuforiaDemo extends LinearOpMode
 {
     // Variables to be used for later
     private VuforiaLocalizer vuforiaLocalizer;
-    int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
+    //int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
     private VuforiaLocalizer.Parameters parameters;
+    //VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters(cameraMonitorViewId);
+
     private VuforiaTrackables visionTargets;
     private VuforiaTrackable target;
     private VuforiaTrackableDefaultListener listener;
@@ -82,7 +84,8 @@ public class VuforiaDemo extends LinearOpMode
     {
         float distanceFromCenter = 1829;
         // Setup parameters to create localizer
-        parameters = new VuforiaLocalizer.Parameters(cameraMonitorViewId); // To remove the camera view from the screen, remove the cameraMonitorViewId
+        //parameters = new VuforiaLocalizer.Parameters(cameraMonitorViewId); // To remove the camera view from the screen, remove the cameraMonitorViewId
+        parameters = new VuforiaLocalizer.Parameters();
         parameters.vuforiaLicenseKey = VUFORIA_KEY;
         parameters.cameraDirection = VuforiaLocalizer.CameraDirection.BACK;
         parameters.useExtendedTracking = false;
