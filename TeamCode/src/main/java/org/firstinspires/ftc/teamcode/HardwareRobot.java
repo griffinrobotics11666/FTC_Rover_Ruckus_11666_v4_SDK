@@ -151,13 +151,16 @@ public class HardwareRobot {
         //While loop is necessary!
         while (leftBack.isBusy() || rightFront.isBusy() || rightBack.isBusy() || leftFront.isBusy())
         {
-            //TODO: Add Telemetry
+            telemetry.addData("Left Front:", leftFront.getCurrentPosition());
+            telemetry.addData("Left Back:", leftBack.getCurrentPosition());
+            telemetry.addData("Right Front:", rightFront.getCurrentPosition());
+            telemetry.addData("Right Back:", rightBack.getCurrentPosition());
+
+            telemetry.update();
 
         }
 
         stopRobot();
-
-
     }
     public void turn(double angle, double speed)
     {
@@ -241,5 +244,59 @@ public class HardwareRobot {
         distance = distance / count;
 
         return distance;
+    }
+
+
+    public void strafe(double distance, double speed){
+        int newLeftFrontTarget;
+        int newRightBackTarget;
+        int newRightFrontTarget;
+        int newLeftBackTarget;
+
+        leftBack.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        rightBack.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        leftFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        rightFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+        leftBack.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        rightBack.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        leftFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        rightFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+        leftBack.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        rightBack.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        leftFront.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        rightFront.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+        newLeftFrontTarget = leftFront.getCurrentPosition() + (int)(distance * constants.getStrafe());
+        newLeftBackTarget = leftBack.getCurrentPosition() - (int)(distance * constants.getStrafe());
+        newRightFrontTarget = rightFront.getCurrentPosition() + (int)(distance * constants.getStrafe());
+        newRightBackTarget = rightBack.getCurrentPosition() - (int)(distance * constants.getStrafe());
+
+        leftFront.setTargetPosition(newLeftFrontTarget);
+        leftBack.setTargetPosition(newLeftBackTarget);
+        rightFront.setTargetPosition(newRightFrontTarget);
+        rightBack.setTargetPosition(newRightBackTarget);
+
+        leftFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        leftBack.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        rightFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        rightBack.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+        leftFront.setPower(Math.abs(speed));
+        rightFront.setPower(Math.abs(speed));
+        leftBack.setPower(Math.abs(-speed));
+        rightBack.setPower(Math.abs(-speed));
+
+        while (leftBack.isBusy() || rightFront.isBusy() || rightBack.isBusy() || leftFront.isBusy())
+        {
+            telemetry.addData("Left Front:", leftFront.getCurrentPosition());
+            telemetry.addData("Left Back:", leftBack.getCurrentPosition());
+            telemetry.addData("Right Front:", rightFront.getCurrentPosition());
+            telemetry.addData("Right Back:", rightBack.getCurrentPosition());
+
+            telemetry.update();
+        }
+        stopRobot();
     }
 }

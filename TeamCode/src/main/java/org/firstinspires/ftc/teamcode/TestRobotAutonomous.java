@@ -24,6 +24,7 @@ public class TestRobotAutonomous extends LinearOpMode {
 
 
 
+
     @Override
     public void runOpMode() throws InterruptedException
     {
@@ -35,18 +36,20 @@ public class TestRobotAutonomous extends LinearOpMode {
 
 
         waitForStart();
-        robot.imu.startAccelerationIntegration(new Position(), new Velocity(), 1000);
+//        robot.imu.startAccelerationIntegration(new Position(), new Velocity(), 1000);
+        while(opModeIsActive()) {
+            telemetry.addData("IsAligned", robot.detector.getAligned()); // Is the bot aligned with the gold mineral
+            telemetry.addData("X Pos", robot.detector.getXPosition());
 
+
+
+
+            telemetry.update();
+
+        }
+        robot.detector.disable();
         //Do stuff
-        robot.move(24,.4);
-        sleep(1000);
-        robot.turn(90,.7);
-        sleep(1000);
-        robot.turn(90,.7);
-        sleep(1000);
-        robot.turn(90,.7);
-        sleep(1000);
-        robot.turn(90, .7);
+
 
 
 

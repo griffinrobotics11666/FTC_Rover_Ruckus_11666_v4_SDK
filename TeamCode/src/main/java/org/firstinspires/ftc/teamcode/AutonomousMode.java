@@ -40,10 +40,11 @@ public class AutonomousMode extends LinearOpMode {
         robot.imu.startAccelerationIntegration(new Position(), new Velocity(), 1000);
 
         //Do stuff
-        while(opModeIsActive()){
-            telemetry.addData("distance", robot.getDistance());
-            telemetry.update();
-        }
+        robot.strafe(10,1);
+//        while(opModeIsActive()){
+//            telemetry.addData("distance", robot.getDistance());
+//            telemetry.update();
+//        }
 //        robot.move(24,.4);
 //        sleep(1000);
 //        robot.turn(90,.7);
