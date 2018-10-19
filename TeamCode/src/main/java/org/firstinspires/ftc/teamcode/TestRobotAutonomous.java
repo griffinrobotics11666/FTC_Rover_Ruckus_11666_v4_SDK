@@ -31,6 +31,8 @@ public class TestRobotAutonomous extends LinearOpMode {
         //Init
         robot.init(hardwareMap);
 
+
+
         //robot.imu.initialize(parameters);
         //Need to test to see if this fixes the running part.
 
@@ -41,6 +43,8 @@ public class TestRobotAutonomous extends LinearOpMode {
             telemetry.addData("IsAligned", robot.detector.getAligned()); // Is the bot aligned with the gold mineral
             telemetry.addData("X Pos", robot.detector.getXPosition());
 
+            robot.alignRobot(.2);
+
 
 
 
@@ -49,8 +53,6 @@ public class TestRobotAutonomous extends LinearOpMode {
         }
         robot.detector.disable();
         //Do stuff
-
-
 
 
     }

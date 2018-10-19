@@ -39,8 +39,7 @@ public class HardwareTestRobot
 
 
     public GoldAlignDetector detector;
-    double blockPos = detector.getXPosition();
-    boolean isAligned = detector.getAligned();
+    int centerValue = 290;
 
     TestRobotConstants constants = new TestRobotConstants();
 
@@ -103,6 +102,8 @@ public class HardwareTestRobot
         detector.ratioScorer.perfectRatio = 1.0;
 
         detector.enable();
+
+
 
 
 
@@ -183,7 +184,6 @@ public class HardwareTestRobot
 
         targetAngle = initalAngle + angle;
 
-        //TODO change this to deal with over corrections (hint: change the if angle > 0 part!)
         while (Math.abs(targetAngle - robotAngle)> .1)
         {
             angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
@@ -232,6 +232,21 @@ public class HardwareTestRobot
 
         }
         stopRobot();
+    }
+    public void alignRobot(double speed){
+        while (!detector.getAligned()){
+            if (detector.getXPosition() > centerValue){
+                leftDrive.setPower(-speed);
+                rightDrive.setPower(-speed);
+            }else if (detector.getXPosition() < centerValue){
+                leftDrive.setPower(speed);
+                rightDrive.setPower(speed);
+            }
+        }
+        if (detector.getAligned()){
+            leftDrive.setPower(0);
+            rightDrive.setPower(0);
+        }
     }
 
 }

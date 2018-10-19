@@ -20,6 +20,9 @@ public class RobotConstants {
     {
         return (10000/98)*(10/9.25);
     }
+    public double getLift(){
+        return 1000;
+    }
 }
 
 

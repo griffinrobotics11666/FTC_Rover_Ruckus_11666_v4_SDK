@@ -72,8 +72,12 @@ public class DriverControl extends LinearOpMode
             {
                 maxSpeed = topSpeed;
             }
-            //TODO When right, forward forward backward backward
-            //TODO increase top speed.
+
+            if (gamepad2.a){
+                robot.lift(1);
+                sleep(1000);
+            }
+
 
             //RANGE CLIP
             speedLeftFront = Range.clip(drive + turn + strafe, -maxSpeed, maxSpeed);

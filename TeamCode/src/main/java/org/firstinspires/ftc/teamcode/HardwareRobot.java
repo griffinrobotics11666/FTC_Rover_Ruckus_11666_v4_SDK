@@ -28,6 +28,7 @@ public class HardwareRobot {
     public DcMotor leftBack = null;
     public DcMotor rightFront = null;
     public DcMotor rightBack = null;
+    public DcMotor lift = null;
 
     double distance;
 
@@ -41,6 +42,7 @@ public class HardwareRobot {
     HardwareMap hwMap = null;
     Telemetry telemetry;
     RobotConstants constants = new RobotConstants();
+    public boolean isTop = false;
 
 
 
@@ -55,6 +57,9 @@ public class HardwareRobot {
         leftBack = hwMap.get(DcMotor.class, "motor_2");
         rightBack = hwMap.get(DcMotor.class, "motor_3");
         rightFront = hwMap.get(DcMotor.class, "motor_4");
+
+        lift = hwMap.get(DcMotor.class, "lift");
+
         sensorRange = hwMap.get(DistanceSensor.class, "sensor_range");
 
         /* servo = hwMap.get(Servo.class, "servo_1");
@@ -74,6 +79,8 @@ public class HardwareRobot {
         leftBack.setPower(0);
         rightBack.setPower(0);
         rightFront.setPower(0);
+
+        lift.setPower(0);
 
         //set servo to initial position
         /*servo.setPosition(servoHomePosition);*/
@@ -298,5 +305,28 @@ public class HardwareRobot {
             telemetry.update();
         }
         stopRobot();
+    }
+    public void lift(double speed){
+        int newLiftTarget;
+
+        lift.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+        lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+        lift.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+        if (isTop) {
+            newLiftTarget = lift.getCurrentPosition() - (int) constants.getLift();
+            isTop = false;
+        } else {
+            newLiftTarget = lift.getCurrentPosition() + (int) constants.getLift();
+            isTop = true;
+        }
+
+        lift.setTargetPosition(newLiftTarget);
+
+        lift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+        lift.setPower(speed);
     }
 }
