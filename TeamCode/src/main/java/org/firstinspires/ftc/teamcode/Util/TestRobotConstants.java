@@ -16,11 +16,12 @@ public class TestRobotConstants {
 
     //TODO: Test for values
     private final int ENCODER_TICKS_PER_REVOLUTION_20 = 140*4; // NeverRest 20
+    private final int ENCODER_TICKS_PER_REVOLUTION_60 = 420*4; // NeverRest 60
 
     //Methods
-    public double getTICKS_PER_INCH_20()
+    public double getTICKS_PER_INCH_60()
     {
-        return (double)(GEAR_RATIO * ENCODER_TICKS_PER_REVOLUTION_20 / WHEEL_CIRCUMFERENCE);
+        return (double)(GEAR_RATIO * ENCODER_TICKS_PER_REVOLUTION_60 / WHEEL_CIRCUMFERENCE);
     }
     public double getWHEEL_DIAMETER()
     {

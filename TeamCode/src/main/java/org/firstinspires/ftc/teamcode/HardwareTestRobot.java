@@ -90,7 +90,7 @@ public class HardwareTestRobot
         detector.useDefaults();
 
         // Optional Tuning
-        detector.alignSize = 100; // How wide (in pixels) is the range in which the gold object will be aligned. (Represented by green bars in the preview)
+        detector.alignSize = 75; // How wide (in pixels) is the range in which the gold object will be aligned. (Represented by green bars in the preview)
         detector.alignPosOffset = 0; // How far from center frame to offset this alignment zone.
         detector.downscale = 0.4; // How much to downscale the input frames
 
@@ -144,9 +144,9 @@ public class HardwareTestRobot
         rightDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         //find how many encoder counts the motor is at, then add the distance to it
-        newLeftDriveTarget = leftDrive.getCurrentPosition() + (int)(distance * constants.getTICKS_PER_INCH_20());
+        newLeftDriveTarget = leftDrive.getCurrentPosition() + (int)(distance * constants.getTICKS_PER_INCH_60());
         //Had "rightdrive.getTargetPosition()
-        newRightDriveTarget = rightDrive.getCurrentPosition() + (int)(distance * constants.getTICKS_PER_INCH_20());
+        newRightDriveTarget = rightDrive.getCurrentPosition() + (int)(distance * constants.getTICKS_PER_INCH_60());
         //set the target encoder count to the motors
         leftDrive.setTargetPosition(newLeftDriveTarget);
         rightDrive.setTargetPosition(newRightDriveTarget);
@@ -161,8 +161,6 @@ public class HardwareTestRobot
         {}
 
         stopRobot();
-
-
     }
     public void turn(double angle, double speed)
     {
@@ -174,7 +172,7 @@ public class HardwareTestRobot
 
         double initalAngle = angles.firstAngle;
         double motorPower;
-        double minMotorPower = 0.2;
+        double minMotorPower = 0.15;
         double powerScaleFactor;
         double targetAngle;
         double currentAngle;
@@ -247,6 +245,74 @@ public class HardwareTestRobot
             leftDrive.setPower(0);
             rightDrive.setPower(0);
         }
+    }
+    public void gyroMove(double distance, double speed)
+    {
+        double dYaw;
+        double deltaSpeed = 0.05;// hardcoded
+        double deltaA = 0;
+        int newLeftDriveTarget;
+        int newRightDriveTarget;
+        angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+        double currentangle = angles.firstAngle;
+
+
+
+        leftDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        rightDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+        leftDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        rightDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+        leftDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        rightDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+        //find how many encoder counts the motor is at, then add the distance to it
+        newLeftDriveTarget = leftDrive.getCurrentPosition() + (int)(distance * constants.getTICKS_PER_INCH_60());
+        newRightDriveTarget = rightDrive.getCurrentPosition() + (int)(distance * constants.getTICKS_PER_INCH_60());
+
+        //set the target encoder count to the motors
+        leftDrive.setTargetPosition(newLeftDriveTarget);
+        rightDrive.setTargetPosition(newRightDriveTarget);
+
+        //set mode to run to position
+        leftDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        rightDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+        //set speed
+        leftDrive.setPower(Math.abs(speed));
+        rightDrive.setPower(Math.abs(speed));
+
+        //While loop is necessary!
+        while (leftDrive.isBusy() && rightDrive.isBusy())
+        {
+            angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+            dYaw = currentangle - angles.firstAngle;
+            if (dYaw > 300){
+                dYaw -= 360;
+            }else if (dYaw < -300){
+                dYaw += 360;
+            }
+            if (dYaw > deltaA){
+                telemetry.addData("left", 0);
+               leftDrive.setPower(speed - deltaSpeed);
+               rightDrive.setPower(speed + deltaSpeed);
+           }else if (dYaw < deltaA){
+                telemetry.addData("right", 0);
+               leftDrive.setPower(speed + deltaSpeed);
+               rightDrive.setPower(speed - deltaSpeed);
+           }else {
+                telemetry.addData("straight", 0);
+               leftDrive.setPower(speed);
+               rightDrive.setPower(speed);
+           }
+           telemetry.update();
+        }
+
+        angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+        turn(currentangle - angles.firstAngle, .2);
+
+        stopRobot();
     }
 
 }

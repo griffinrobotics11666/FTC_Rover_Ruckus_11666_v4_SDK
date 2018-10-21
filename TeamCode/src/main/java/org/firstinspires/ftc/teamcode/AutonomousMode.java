@@ -35,12 +35,23 @@ public class AutonomousMode extends LinearOpMode {
         //robot.imu.initialize(parameters);
         //Need to test to see if this fixes the running part.
 
+        //!!!!!DON'T USE 180 IN TURN WITH GYRO MOVEMENT AFTER!!!!!!!
+
 
         waitForStart();
         robot.imu.startAccelerationIntegration(new Position(), new Velocity(), 1000);
 
         //Do stuff
-        robot.strafe(10,1);
+        robot.gyroMove(96,.5);
+        sleep (5000);
+        robot.turn(90,.5);
+        robot.gyroMove(96,.5);
+
+        sleep (15000);
+
+        robot.move(96,.5);
+        robot.turn(180,.5);
+        robot.move(96,.5);
 //        while(opModeIsActive()){
 //            telemetry.addData("distance", robot.getDistance());
 //            telemetry.update();
@@ -54,6 +65,7 @@ public class AutonomousMode extends LinearOpMode {
 //        robot.turn(90,.7);
 //        sleep(1000);
 //        robot.turn(90, .7);
+        robot.detector.disable();
  }
 
 

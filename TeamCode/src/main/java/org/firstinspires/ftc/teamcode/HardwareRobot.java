@@ -1,5 +1,9 @@
 package org.firstinspires.ftc.teamcode;
 
+import com.disnodeteam.dogecv.CameraViewDisplay;
+import com.disnodeteam.dogecv.DogeCV;
+import com.disnodeteam.dogecv.detectors.roverrukus.GoldAlignDetector;
+
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -43,6 +47,9 @@ public class HardwareRobot {
     Telemetry telemetry;
     RobotConstants constants = new RobotConstants();
     public boolean isTop = false;
+
+    public GoldAlignDetector detector;
+    int centerValue = 290;
 
 
 
@@ -93,6 +100,24 @@ public class HardwareRobot {
         parameters.accelerationIntegrationAlgorithm = new JustLoggingAccelerationIntegrator();
         imu = hwMap.get(BNO055IMU.class, "imu");
         imu.initialize(parameters);
+
+        detector = new GoldAlignDetector();
+        detector.init(hwMap.appContext, CameraViewDisplay.getInstance());
+        detector.useDefaults();
+
+        // Optional Tuning
+        detector.alignSize = 75; // How wide (in pixels) is the range in which the gold object will be aligned. (Represented by green bars in the preview)
+        detector.alignPosOffset = 0; // How far from center frame to offset this alignment zone.
+        detector.downscale = 0.4; // How much to downscale the input frames
+
+        detector.areaScoringMethod = DogeCV.AreaScoringMethod.MAX_AREA; // Can also be PERFECT_AREA
+        //detector.perfectAreaScorer.perfectArea = 10000; // if using PERFECT_AREA scoring
+        detector.maxAreaScorer.weight = 0.005;
+
+        detector.ratioScorer.weight = 5;
+        detector.ratioScorer.perfectRatio = 1.0;
+
+        detector.enable();
 
     }
     public void stopRobot()
@@ -189,13 +214,13 @@ public class HardwareRobot {
 
         targetAngle = initalAngle + angle;
 
-        while (Math.abs(targetAngle - robotAngle)> .1)
+        while (Math.abs(targetAngle - robotAngle)> .25)
         {
             angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
             currentAngle = angles.firstAngle;
 
             //update speed dynamically to slow when approaching the target
-            powerScaleFactor = Math.abs(targetAngle-robotAngle)/angle;
+            powerScaleFactor = Math.sqrt(Math.abs(targetAngle-robotAngle)/angle);
             motorPower = powerScaleFactor*speed;
             if (motorPower < minMotorPower)
             {
@@ -292,8 +317,8 @@ public class HardwareRobot {
 
         leftFront.setPower(Math.abs(speed));
         rightFront.setPower(Math.abs(speed));
-        leftBack.setPower(Math.abs(-speed));
-        rightBack.setPower(Math.abs(-speed));
+        leftBack.setPower(Math.abs(speed)); //-
+        rightBack.setPower(Math.abs(speed)); //-
 
         while (leftBack.isBusy() || rightFront.isBusy() || rightBack.isBusy() || leftFront.isBusy())
         {
@@ -329,4 +354,108 @@ public class HardwareRobot {
 
         lift.setPower(speed);
     }
+    public void alignRobot(double speed){
+        while (!detector.getAligned()){
+            if (detector.getXPosition() > centerValue){
+                leftFront.setPower(-speed);
+                rightFront.setPower(-speed);
+                leftBack.setPower(-speed);
+                rightBack.setPower(-speed);
+            }else if (detector.getXPosition() < centerValue){
+                leftFront.setPower(speed);
+                rightFront.setPower(speed);
+                leftBack.setPower(speed);
+                rightBack.setPower(speed);
+            }
+        }
+        if (detector.getAligned()){
+            leftFront.setPower(0);
+            rightFront.setPower(0);
+            leftBack.setPower(0);
+            rightBack.setPower(0);
+        }
+    }
+    public void gyroMove(double distance, double speed)
+    {
+        double deltaSpeed = 0.05;// hardcoded
+        double deltaA = 0;
+        angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+        double currentAngle = angles.firstAngle;
+
+
+
+        int newLeftFrontTarget;
+        int newRightBackTarget;
+        int newRightFrontTarget;
+        int newLeftBackTarget;
+
+        leftBack.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        rightBack.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        leftFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        rightFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+        leftBack.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        rightBack.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        leftFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        rightFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+        leftBack.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        rightBack.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        leftFront.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        rightFront.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+        //find how many encoder counts the motor is at, then add the distance to it
+        newLeftFrontTarget = leftFront.getCurrentPosition() + (int)(distance * constants.getTICKS_PER_INCH_40());
+        newLeftBackTarget = leftBack.getCurrentPosition() + (int)(distance * constants.getTICKS_PER_INCH_40());
+        newRightFrontTarget = rightFront.getCurrentPosition() + (int)(distance * constants.getTICKS_PER_INCH_40());
+        newRightBackTarget = rightBack.getCurrentPosition() + (int)(distance * constants.getTICKS_PER_INCH_40());
+        //set the target encoder count to the motors
+        leftFront.setTargetPosition(newLeftFrontTarget);
+        leftBack.setTargetPosition(newLeftBackTarget);
+        rightFront.setTargetPosition(newRightFrontTarget);
+        rightBack.setTargetPosition(newRightBackTarget);
+        //set mode to run to position
+        leftFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        leftBack.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        rightFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        rightBack.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        //set speed
+        leftFront.setPower(Math.abs(speed));
+        rightFront.setPower(Math.abs(speed));
+        leftBack.setPower(Math.abs(speed));
+        rightBack.setPower(Math.abs(speed));
+
+        //While loop is necessary!
+        while (leftBack.isBusy() && rightFront.isBusy() && rightBack.isBusy() && leftFront.isBusy())
+        {
+            angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+
+            if (currentAngle - angles.firstAngle > deltaA){
+                telemetry.addData("left", 0);
+                leftFront.setPower(speed - deltaSpeed);
+                rightFront.setPower(speed + deltaSpeed);
+                leftBack.setPower(speed - deltaSpeed);
+                rightBack.setPower(speed + deltaSpeed);
+            }else if (currentAngle - angles.firstAngle < deltaA){
+                telemetry.addData("right", 0);
+                leftFront.setPower(speed + deltaSpeed);
+                rightFront.setPower(speed - deltaSpeed);
+                leftBack.setPower(speed + deltaSpeed);
+                rightBack.setPower(speed - deltaSpeed);
+            }else {
+                telemetry.addData("straight", 0);
+                leftFront.setPower(speed);
+                rightFront.setPower(speed);
+                leftBack.setPower(speed);
+                rightBack.setPower(speed);
+            }
+            telemetry.update();
+        }
+
+        //angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+        //turn(currentAngle - angles.firstAngle, .2);
+
+        stopRobot();
+    }
+
 }
