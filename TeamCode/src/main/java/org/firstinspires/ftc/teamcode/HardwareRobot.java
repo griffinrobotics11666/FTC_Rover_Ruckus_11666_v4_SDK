@@ -120,6 +120,9 @@ public class HardwareRobot {
         detector.enable();
 
     }
+
+    //Methods
+
     public void stopRobot()
     {
         leftBack.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -138,6 +141,7 @@ public class HardwareRobot {
         rightBack.setPower(0);
 
     }
+
     public void move(double distance, double speed)
     {
         int newLeftFrontTarget;
@@ -194,6 +198,7 @@ public class HardwareRobot {
 
         stopRobot();
     }
+
     public void turn(double angle, double speed)
     {
         leftBack.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -267,6 +272,7 @@ public class HardwareRobot {
         }
         stopRobot();
     }
+
     public double getDistance(){
         int count = 10;
 
@@ -277,7 +283,6 @@ public class HardwareRobot {
 
         return distance;
     }
-
 
     public void strafe(double distance, double speed){
         int newLeftFrontTarget;
@@ -331,6 +336,7 @@ public class HardwareRobot {
         }
         stopRobot();
     }
+
     public void lift(double speed){
         int newLiftTarget;
 
@@ -354,6 +360,7 @@ public class HardwareRobot {
 
         lift.setPower(speed);
     }
+
     public void alignRobot(double speed){
         while (!detector.getAligned()){
             if (detector.getXPosition() > centerValue){
@@ -375,6 +382,7 @@ public class HardwareRobot {
             rightBack.setPower(0);
         }
     }
+
     public void gyroMove(double distance, double speed)
     {
         double deltaSpeed = 0.05;// hardcoded
