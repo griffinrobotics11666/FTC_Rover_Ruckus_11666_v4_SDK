@@ -34,13 +34,18 @@ public class HardwareRobot {
     public DcMotor rightBack = null;
     public DcMotor lift = null;
 
+    public Servo leftServo = null;
+    public Servo rightServo = null;
+    public Servo liftServo = null;
+    double servoSpeed = .01;
+    public double servoHomePosition = 0.5;
+
     double distance;
 
     public DistanceSensor sensorRange;
     //Rev2mDistanceSensor sensorTimeOfFlight = (Rev2mDistanceSensor)sensorRange;
     //public  Servo servo = null;
     public boolean ishome = true;
-    public double servoHomePosition = 0.5;
     BNO055IMU imu;
     Orientation angles;
     HardwareMap hwMap = null;
@@ -69,6 +74,10 @@ public class HardwareRobot {
 
         sensorRange = hwMap.get(DistanceSensor.class, "sensor_range");
 
+        leftServo = hwMap.get(Servo.class, "leftServo");
+        rightServo = hwMap.get(Servo.class, "rightServo");
+        liftServo = hwMap.get(Servo.class, "liftServo");
+
         /* servo = hwMap.get(Servo.class, "servo_1");
         //set motor direction*/
         leftFront.setDirection(DcMotor.Direction.REVERSE);
@@ -91,6 +100,9 @@ public class HardwareRobot {
 
         //set servo to initial position
         /*servo.setPosition(servoHomePosition);*/
+        liftServo.setPosition(servoHomePosition);
+        leftServo.setPosition(servoHomePosition);
+        rightServo.setPosition(servoHomePosition);
 
         BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
         parameters.angleUnit = BNO055IMU.AngleUnit.DEGREES;
@@ -123,7 +135,7 @@ public class HardwareRobot {
 
     //Methods
 
-    public void stopRobot()
+    private void stopRobot()
     {
         leftBack.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         rightBack.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -465,5 +477,37 @@ public class HardwareRobot {
 
         stopRobot();
     }
+
+    public void leftServoOpen(){
+        if (leftServo.getPosition() > servoSpeed) {
+            leftServo.setPosition(leftServo.getPosition() - servoSpeed);
+        }
+    }
+    public void leftServoClose(){
+        if(leftServo.getPosition() < 1 - servoSpeed) {
+            leftServo.setPosition(leftServo.getPosition() + servoSpeed);
+        }
+    }
+    public void rightServoOpen(){
+        if(rightServo.getPosition() < 1 - servoSpeed) {
+            rightServo.setPosition(rightServo.getPosition() + servoSpeed);
+        }
+    }
+    public void rightServoClose(){
+        if(rightServo.getPosition() > servoSpeed) {
+            rightServo.setPosition(rightServo.getPosition() - servoSpeed);
+        }
+    }
+    public void liftServoOpen(){
+        if(liftServo.getPosition() < 1 - servoSpeed){
+            liftServo.setPosition(liftServo.getPosition() + servoSpeed);
+        }
+    }
+    public void liftServoClose(){
+        if(liftServo.getPosition() > servoSpeed){
+            liftServo.setPosition(liftServo.getPosition() - servoSpeed);
+        }
+    }
+
 
 }

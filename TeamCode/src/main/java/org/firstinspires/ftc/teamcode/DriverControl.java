@@ -63,21 +63,22 @@ public class DriverControl extends LinearOpMode
             turn = gamepad1.left_stick_x;
             strafe = gamepad1.right_stick_x;
 
-            //toggle speed for fine adjustment
-            if (gamepad1.right_bumper)
+            if (gamepad2.a)
             {
-                maxSpeed = topSpeed /3;
-            }
-            else
-            {
-                maxSpeed = topSpeed;
-            }
-
-            if (gamepad2.a){
                 robot.lift(1);
                 sleep(1000);
             }
 
+            if (gamepad2.x) {robot.leftServoOpen();     }
+            if (gamepad2.y) {robot.leftServoClose();    }
+            if (gamepad2.a) {robot.rightServoOpen();    }
+            if (gamepad2.b) {robot.rightServoClose();   }
+            if (gamepad2.right_bumper){robot.liftServoClose();  }
+            if (gamepad2.left_bumper) {robot.liftServoOpen();   }
+
+            //toggle speed for fine adjustment
+            if (gamepad1.right_bumper){maxSpeed = topSpeed /3;}
+            else {maxSpeed = topSpeed; }
 
             //RANGE CLIP
             speedLeftFront = Range.clip(drive + turn + strafe, -maxSpeed, maxSpeed);
@@ -85,15 +86,20 @@ public class DriverControl extends LinearOpMode
             speedLeftBack = Range.clip(drive + turn - strafe, -maxSpeed, maxSpeed);
             speedRightBack = Range.clip(drive - turn - strafe, -maxSpeed, maxSpeed);
 
-
             //set motor speed
             robot.leftFront.setPower(speedLeftFront);
             robot.rightFront.setPower(speedRightFront);
             robot.rightBack.setPower(speedRightBack);
             robot.leftBack.setPower(speedLeftBack);
 
+
+            //Telemetry
             telemetry.addData("Status", "Run Time: " + runtime.toString());
+            telemetry.addData("left servo position:", robot.leftServo.getPosition());
+            telemetry.addData("right servo position:", robot.rightServo.getPosition());
+            telemetry.addData("Lift Servo Position:", robot.liftServo.getPosition());
             telemetry.update();
         }
+        robot.detector.disable();
     }
 }
