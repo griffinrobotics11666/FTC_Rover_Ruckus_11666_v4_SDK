@@ -37,7 +37,7 @@ public class HardwareRobot {
     public Servo leftServo = null;
     public Servo rightServo = null;
     public Servo liftServo = null;
-    double servoSpeed = .01;
+    double servoSpeed = .0005;
     public double servoHomePosition = 0.5;
 
     double distance;
@@ -479,34 +479,23 @@ public class HardwareRobot {
     }
 
     public void leftServoOpen(){
-        if (leftServo.getPosition() > servoSpeed) {
-            leftServo.setPosition(leftServo.getPosition() - servoSpeed);
-        }
+        leftServo.setPosition(constants.getLeftServoOpen());
     }
     public void leftServoClose(){
-        if(leftServo.getPosition() < 1 - servoSpeed) {
-            leftServo.setPosition(leftServo.getPosition() + servoSpeed);
-        }
+        leftServo.setPosition(constants.getLeftServoClose());
     }
     public void rightServoOpen(){
-        if(rightServo.getPosition() < 1 - servoSpeed) {
-            rightServo.setPosition(rightServo.getPosition() + servoSpeed);
-        }
+        rightServo.setPosition(constants.getRightServoOpen());
     }
     public void rightServoClose(){
-        if(rightServo.getPosition() > servoSpeed) {
-            rightServo.setPosition(rightServo.getPosition() - servoSpeed);
-        }
+        rightServo.setPosition(constants.getRightServoClose());
     }
     public void liftServoOpen(){
-        if(liftServo.getPosition() < 1 - servoSpeed){
-            liftServo.setPosition(liftServo.getPosition() + servoSpeed);
-        }
+            liftServo.setPosition(constants.getLiftServoOpen());
+
     }
     public void liftServoClose(){
-        if(liftServo.getPosition() > servoSpeed){
-            liftServo.setPosition(liftServo.getPosition() - servoSpeed);
-        }
+        liftServo.setPosition(constants.getLiftServoClose());
     }
 
 

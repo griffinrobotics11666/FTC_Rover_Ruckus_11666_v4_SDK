@@ -33,6 +33,7 @@ public class DriverControl extends LinearOpMode
     {
         //map hardware variables to hardware map
         robot.init(hardwareMap);
+        robot.detector.disable();
 
 
 
@@ -63,11 +64,6 @@ public class DriverControl extends LinearOpMode
             turn = gamepad1.left_stick_x;
             strafe = gamepad1.right_stick_x;
 
-            if (gamepad2.a)
-            {
-                robot.lift(1);
-                sleep(1000);
-            }
 
             if (gamepad2.x) {robot.leftServoOpen();     }
             if (gamepad2.y) {robot.leftServoClose();    }
@@ -100,6 +96,6 @@ public class DriverControl extends LinearOpMode
             telemetry.addData("Lift Servo Position:", robot.liftServo.getPosition());
             telemetry.update();
         }
-        robot.detector.disable();
+        //robot.detector.disable();
     }
 }
