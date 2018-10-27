@@ -71,6 +71,16 @@ public class DriverControl extends LinearOpMode
             if (gamepad2.b) {robot.rightServoClose();   }
             if (gamepad2.right_bumper){robot.liftServoClose();  }
             if (gamepad2.left_bumper) {robot.liftServoOpen();   }
+            if (gamepad2.dpad_up) {robot.lift(.3);        }
+            if(gamepad2.right_trigger > 0) {
+                robot.lift.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+                robot.lift.setPower(gamepad2.right_trigger);
+            } else if (gamepad2.left_trigger > 0){
+                robot.lift.setPower(-gamepad2.left_trigger);
+            }else if (gamepad2.dpad_left){
+                robot.lift.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+                robot.lift.setPower(0);
+            }
 
             //toggle speed for fine adjustment
             if (gamepad1.right_bumper){maxSpeed = topSpeed /3;}
@@ -94,6 +104,7 @@ public class DriverControl extends LinearOpMode
             telemetry.addData("left servo position:", robot.leftServo.getPosition());
             telemetry.addData("right servo position:", robot.rightServo.getPosition());
             telemetry.addData("Lift Servo Position:", robot.liftServo.getPosition());
+            telemetry.addData("Lift motor Encoder Value:", robot.lift.getCurrentPosition());
             telemetry.update();
         }
         //robot.detector.disable();

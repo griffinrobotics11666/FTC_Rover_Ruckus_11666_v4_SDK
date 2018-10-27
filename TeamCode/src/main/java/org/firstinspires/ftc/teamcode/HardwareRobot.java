@@ -33,6 +33,7 @@ public class HardwareRobot {
     public DcMotor rightFront = null;
     public DcMotor rightBack = null;
     public DcMotor lift = null;
+    public int liftSpeed = 1;
 
     public Servo leftServo = null;
     public Servo rightServo = null;
@@ -77,6 +78,9 @@ public class HardwareRobot {
         leftServo = hwMap.get(Servo.class, "leftServo");
         rightServo = hwMap.get(Servo.class, "rightServo");
         liftServo = hwMap.get(Servo.class, "liftServo");
+
+        lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        lift.setDirection(DcMotor.Direction.FORWARD);
 
         /* servo = hwMap.get(Servo.class, "servo_1");
         //set motor direction*/
@@ -361,6 +365,8 @@ public class HardwareRobot {
         if (isTop) {
             newLiftTarget = lift.getCurrentPosition() - (int) constants.getLift();
             isTop = false;
+            speed = -speed;
+
         } else {
             newLiftTarget = lift.getCurrentPosition() + (int) constants.getLift();
             isTop = true;
@@ -371,7 +377,55 @@ public class HardwareRobot {
         lift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
         lift.setPower(speed);
+
+        while (lift.isBusy()){
+            if (isTop) {
+                telemetry.addData("Going Up", 1);
+            }else{
+                telemetry.addData("Going Down", 1);
+            }
+            telemetry.addData("current:",lift.getCurrentPosition());
+            telemetry.addData("target:", newLiftTarget);
+            telemetry.update();
+        }
+        lift.setPower(0);
+
     }
+    public void liftUp(double speed){
+        int newLiftTarget;
+
+        lift.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+//        lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+        lift.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+            newLiftTarget = lift.getCurrentPosition() + liftSpeed;
+
+        lift.setTargetPosition(newLiftTarget);
+
+        lift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+        lift.setPower(speed);
+    }
+    public void liftDown(double speed){
+        int newLiftTarget;
+
+        lift.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+//        lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+        lift.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+        newLiftTarget = lift.getCurrentPosition() - liftSpeed;
+
+        lift.setTargetPosition(newLiftTarget);
+
+        lift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+        lift.setPower(speed);
+    }
+
 
     public void alignRobot(double speed){
         while (!detector.getAligned()){
