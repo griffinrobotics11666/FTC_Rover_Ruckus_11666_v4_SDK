@@ -12,7 +12,6 @@ import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.hardware.rev.Rev2mDistanceSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
-import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
@@ -35,13 +34,25 @@ public class HardwareRobot {
     public DcMotor lift = null;
     public int liftSpeed = 1;
 
+    public DcMotor firstArm = null;
+    public DcMotor middleArm = null;
+
     public Servo leftServo = null;
     public Servo rightServo = null;
     public Servo liftServo = null;
     double servoSpeed = .0005;
     public double servoHomePosition = 0.5;
 
+    public Servo markerServo = null;
+
+    int direction;
+
     double distance;
+
+    public boolean extendedMarker = false;
+
+    public boolean isTopElbow = false;
+    public boolean isTopArm = false;
 
     public DistanceSensor sensorRange;
     //Rev2mDistanceSensor sensorTimeOfFlight = (Rev2mDistanceSensor)sensorRange;
@@ -71,6 +82,9 @@ public class HardwareRobot {
         rightBack = hwMap.get(DcMotor.class, "motor_3");
         rightFront = hwMap.get(DcMotor.class, "motor_4");
 
+        firstArm = hwMap.get(DcMotor.class, "firstArm");
+        middleArm = hwMap.get(DcMotor.class, "middleArm");
+
         lift = hwMap.get(DcMotor.class, "lift");
 
         sensorRange = hwMap.get(DistanceSensor.class, "sensor_range");
@@ -79,9 +93,10 @@ public class HardwareRobot {
         rightServo = hwMap.get(Servo.class, "rightServo");
         liftServo = hwMap.get(Servo.class, "liftServo");
 
-        lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        lift.setDirection(DcMotor.Direction.FORWARD);
+        markerServo = hwMap.get(Servo.class, "markerServo");
 
+        lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        lift.setDirection(DcMotor.Direction.REVERSE); //changed direction
         /* servo = hwMap.get(Servo.class, "servo_1");
         //set motor direction*/
         leftFront.setDirection(DcMotor.Direction.REVERSE);
@@ -89,10 +104,16 @@ public class HardwareRobot {
         rightBack.setDirection(DcMotor.Direction.FORWARD);
         leftBack.setDirection(DcMotor.Direction.REVERSE);
 
+        firstArm.setDirection(DcMotorSimple.Direction.REVERSE);
+        middleArm.setDirection(DcMotorSimple.Direction.FORWARD);
+
         leftFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         leftBack.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         rightFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         rightBack.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+        firstArm.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        middleArm.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         //set motor power
         leftFront.setPower(0);
@@ -100,13 +121,16 @@ public class HardwareRobot {
         rightBack.setPower(0);
         rightFront.setPower(0);
 
+        firstArm.setPower(0);
+        middleArm.setPower(0);
+
         lift.setPower(0);
 
         //set servo to initial position
         /*servo.setPosition(servoHomePosition);*/
-        liftServo.setPosition(servoHomePosition);
-        leftServo.setPosition(servoHomePosition);
-        rightServo.setPosition(servoHomePosition);
+        liftServo.setPosition(.3);
+        leftServo.setPosition(constants.getLeftServoClose());
+        rightServo.setPosition(constants.getRightServoClose());
 
         BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
         parameters.angleUnit = BNO055IMU.AngleUnit.DEGREES;
@@ -122,7 +146,7 @@ public class HardwareRobot {
         detector.useDefaults();
 
         // Optional Tuning
-        detector.alignSize = 75; // How wide (in pixels) is the range in which the gold object will be aligned. (Represented by green bars in the preview)
+        detector.alignSize = 150; // How wide (in pixels) is the range in which the gold object will be aligned. (Represented by green bars in the preview)
         detector.alignPosOffset = 0; // How far from center frame to offset this alignment zone.
         detector.downscale = 0.4; // How much to downscale the input frames
 
@@ -139,8 +163,7 @@ public class HardwareRobot {
 
     //Methods
 
-    private void stopRobot()
-    {
+    private void stopRobot() {
         leftBack.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         rightBack.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         leftFront.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -158,8 +181,7 @@ public class HardwareRobot {
 
     }
 
-    public void move(double distance, double speed)
-    {
+    public void move(double distance, double speed) {
         int newLeftFrontTarget;
         int newRightBackTarget;
         int newRightFrontTarget;
@@ -215,12 +237,19 @@ public class HardwareRobot {
         stopRobot();
     }
 
-    public void turn(double angle, double speed)
-    {
+// TURN DOES NOT LIKE NEGATIVE,COUNTER CLOCKWISE IS POS
+
+    public void turn(double angle, double speed) {
         leftBack.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         rightBack.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        leftFront.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        rightFront.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
         leftFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         rightFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        leftBack.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        rightBack.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
         angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
 
         double initalAngle = angles.firstAngle;
@@ -358,17 +387,15 @@ public class HardwareRobot {
 
         lift.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
-        lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-
         lift.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         if (isTop) {
-            newLiftTarget = lift.getCurrentPosition() - (int) constants.getLift();
+            newLiftTarget = 0;
             isTop = false;
-            speed = -speed;
+
 
         } else {
-            newLiftTarget = lift.getCurrentPosition() + (int) constants.getLift();
+            newLiftTarget = (int) constants.getLift();
             isTop = true;
         }
 
@@ -426,17 +453,77 @@ public class HardwareRobot {
         lift.setPower(speed);
     }
 
+    public void firstArm(double speed){
+        int newFirstArmTarget;
+
+        firstArm.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+        firstArm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+        firstArm.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+        if (isTopArm) {
+            newFirstArmTarget = firstArm.getCurrentPosition() - (int) constants.getArm();
+            isTopArm = false;
+            speed = -speed;
+
+        } else {
+            newFirstArmTarget = firstArm.getCurrentPosition() + (int) constants.getArm();
+            isTopArm = true;
+        }
+
+        firstArm.setTargetPosition(newFirstArmTarget);
+
+        firstArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+        firstArm.setPower(speed);
+
+        while (firstArm.isBusy()){
+        }
+        firstArm.setPower(0);
+    }
+    public void middleArm(double speed){
+        int newFirstArmTarget;
+
+        middleArm.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+        middleArm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+        middleArm.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+        if (isTopElbow) {
+            newFirstArmTarget = middleArm.getCurrentPosition() - (int) constants.getElbow();
+            isTopElbow = false;
+            speed = -speed;
+
+        } else {
+            newFirstArmTarget = middleArm.getCurrentPosition() + (int) constants.getElbow();
+            isTopElbow = true;
+        }
+
+        middleArm.setTargetPosition(newFirstArmTarget);
+
+        middleArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+        middleArm.setPower(speed);
+
+        while (middleArm.isBusy()){
+        }
+        middleArm.setPower(0);
+    }
+
 
     public void alignRobot(double speed){
         while (!detector.getAligned()){
             if (detector.getXPosition() > centerValue){
                 leftFront.setPower(-speed);
                 rightFront.setPower(-speed);
-                leftBack.setPower(-speed);
-                rightBack.setPower(-speed);
-            }else if (detector.getXPosition() < centerValue){
-                leftFront.setPower(speed);
-                rightFront.setPower(speed);
+                leftBack.setPower(speed);
+                rightBack.setPower(speed);
+            }
+            if (detector.getXPosition() < centerValue){
+                leftFront.setPower(-speed);
+                rightFront.setPower(-speed);
                 leftBack.setPower(speed);
                 rightBack.setPower(speed);
             }
@@ -449,14 +536,11 @@ public class HardwareRobot {
         }
     }
 
-    public void gyroMove(double distance, double speed)
-    {
+    public void gyroMove(double distance, double speed) {
         double deltaSpeed = 0.05;// hardcoded
         double deltaA = 0;
         angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
         double currentAngle = angles.firstAngle;
-
-
 
         int newLeftFrontTarget;
         int newRightBackTarget;
@@ -477,7 +561,6 @@ public class HardwareRobot {
         rightBack.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         leftFront.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         rightFront.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-
         //find how many encoder counts the motor is at, then add the distance to it
         newLeftFrontTarget = leftFront.getCurrentPosition() + (int)(distance * constants.getTICKS_PER_INCH_40());
         newLeftBackTarget = leftBack.getCurrentPosition() + (int)(distance * constants.getTICKS_PER_INCH_40());
@@ -498,7 +581,6 @@ public class HardwareRobot {
         rightFront.setPower(Math.abs(speed));
         leftBack.setPower(Math.abs(speed));
         rightBack.setPower(Math.abs(speed));
-
         //While loop is necessary!
         while (leftBack.isBusy() && rightFront.isBusy() && rightBack.isBusy() && leftFront.isBusy())
         {
@@ -525,12 +607,28 @@ public class HardwareRobot {
             }
             telemetry.update();
         }
-
-        //angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
-        //turn(currentAngle - angles.firstAngle, .2);
-
         stopRobot();
     }
+//    public void leftServoOpen(){
+//        leftServo.setPosition(leftServo.getPosition() + .0003);
+//    }
+//    public void leftServoClose(){
+//        leftServo.setPosition(leftServo.getPosition() - .0003);
+//    }
+//    public void rightServoOpen(){
+//        rightServo.setPosition(rightServo.getPosition() + .0003);
+//    }
+//    public void rightServoClose(){
+//        rightServo.setPosition(rightServo.getPosition() - .0003);
+//    }
+//
+//    public void liftServoOpen(){
+//        liftServo.setPosition(liftServo.getPosition() + .0003);
+//    }
+//    public void liftServoClose(){
+//        liftServo.setPosition(liftServo.getPosition() - .0003);
+//    }
+
 
     public void leftServoOpen(){
         leftServo.setPosition(constants.getLeftServoOpen());
@@ -545,12 +643,123 @@ public class HardwareRobot {
         rightServo.setPosition(constants.getRightServoClose());
     }
     public void liftServoOpen(){
-            liftServo.setPosition(constants.getLiftServoOpen());
-
+        liftServo.setPosition(constants.getLiftServoOpen());
     }
     public void liftServoClose(){
         liftServo.setPosition(constants.getLiftServoClose());
     }
 
+    public void sampleMove2(){
+        gyroMove(-16, 1);
+        strafe(14.5,.5);
+
+
+
+    }
+
+    public void sampleMove(){
+        // direction: -1 is left / 0 is center / 1 is right
+        double goldPos = 0;
+        int scanAmount = 10;
+        double forwardMovement = 10;
+//        gyroMove(-18,1);
+
+        int i = 0;
+        while (i < scanAmount){
+            if (detector.isFound())
+            {
+                goldPos += detector.getXPosition();
+                i++;
+            }
+        }
+
+        /*
+        for (int i = 0; i <scanAmount ; i++) {
+            goldPos += detector.getXPosition();
+
+        }
+        */
+        goldPos = goldPos / scanAmount;
+
+        if (goldPos > centerValue && !detector.getAligned()){
+            direction = 1;
+            gyroMove(-16,1);
+            strafe(+14.5, .5);
+            gyroMove(-forwardMovement, .5);
+            gyroMove(forwardMovement, .5);
+        }
+        else if (goldPos < centerValue && !detector.getAligned()){
+            direction = -1;
+            gyroMove(-16,1);
+            strafe(-14.5, .5);
+            gyroMove(-forwardMovement, .5);
+            gyroMove(forwardMovement, .5);
+        }
+        else if (detector.getAligned()){
+            direction = 0;
+            gyroMove(-16,1);
+            gyroMove(-forwardMovement, .5);
+            gyroMove(forwardMovement,.5);
+        }
+
+
+        direction = (int)goldPos;
+    }
+
+    public void markerServo(){
+        if (extendedMarker = false){
+            markerServo.setPosition(1);
+            extendedMarker = true;
+        }
+        if (extendedMarker){
+            markerServo.setPosition(0);
+            extendedMarker = false;
+        }
+    }
+
+    public void armDown(double speed){
+        int newMiddleArmTarget = 0;
+
+        middleArm.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+        middleArm.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+        if (middleArm.getCurrentPosition() > constants.getElbowMax()){
+            newMiddleArmTarget += (int) constants.getElbow() / 2;
+        }
+
+        middleArm.setTargetPosition(newMiddleArmTarget);
+
+        middleArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+        middleArm.setPower(speed);
+
+        while (middleArm.isBusy()){
+        }
+        middleArm.setPower(0);
+
+    }
+    public void armUp(double speed){
+        int newMiddleArmTarget = 0;
+
+        middleArm.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+        middleArm.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+        if (middleArm.getCurrentPosition() < constants.getElbowMin()){
+            newMiddleArmTarget -= (int) constants.getElbow() / 2;
+        }
+
+        middleArm.setTargetPosition(newMiddleArmTarget);
+
+        middleArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+        middleArm.setPower(speed);
+
+        while (middleArm.isBusy()){
+        }
+        middleArm.setPower(0);
+
+    }
 
 }

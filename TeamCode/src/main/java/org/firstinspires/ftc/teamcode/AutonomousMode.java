@@ -42,16 +42,22 @@ public class AutonomousMode extends LinearOpMode {
         robot.imu.startAccelerationIntegration(new Position(), new Velocity(), 1000);
 
         //Do stuff
-        robot.gyroMove(96,.5);
-        sleep (5000);
-        robot.turn(90,.5);
-        robot.gyroMove(96,.5);
+        robot.sampleMove();
+        //TODO Rewrite SampleMove in Autonomous to use sleep or other functions
 
-        sleep (15000);
+        robot.turn(-90,1);
 
-        robot.move(96,.5);
-        robot.turn(180,.5);
-        robot.move(96,.5);
+        if (robot.direction == 1){
+            robot.gyroMove(64,1);
+        }
+        if (robot.direction == 0){
+            robot.gyroMove(64 - 14.5, 1);
+        }
+        if (robot.direction == -1){
+            robot.gyroMove(64 - 14.5 - 14.5, 1);
+        }
+        robot.turn(45,1);
+        robot.gyroMove(35.5,1);
 //        while(opModeIsActive()){
 //            telemetry.addData("distance", robot.getDistance());
 //            telemetry.update();

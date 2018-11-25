@@ -21,25 +21,38 @@ public class RobotConstants {
         return (10000/98)*(10/9.25);
     }
     public double getLift(){
-        return 7000;
+        return 10950;
     }
     public double getLiftServoOpen(){
-        return 1;
+        return .45;
     }
     public double getLiftServoClose(){
-        return .5;
+        return .3;
+        //.32
     }
     public double getLeftServoOpen(){
-        return .466;
+        return .431;
     }
     public double getLeftServoClose(){
-        return .6183;
+        return .613;
     }
     public double getRightServoOpen(){
-        return .7167;
+        return .338;
     }
     public double getRightServoClose(){
-        return .513;
+        return .131;
+    }
+    public double getArm(){
+        return 100;
+    }
+    public double getElbow(){
+        return 100;
+    }
+    public double getElbowMax(){
+        return 100;
+    }
+    public double getElbowMin(){
+        return 100;
     }
 }
 

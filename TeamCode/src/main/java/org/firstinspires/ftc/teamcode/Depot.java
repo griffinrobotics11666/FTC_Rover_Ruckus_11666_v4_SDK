@@ -18,42 +18,26 @@ import org.firstinspires.ftc.teamcode.HardwareRobot;
 
 import static java.lang.Thread.sleep;
 
-@Autonomous (name="Red Crater", group="Autonomous")
-public class redCrater extends LinearOpMode{
-
-
+@Autonomous (name="Depot ", group="Autonomous")
+public class Depot extends LinearOpMode {
 
 
     HardwareRobot robot = new HardwareRobot(telemetry);
     Orientation angles;
 
 
-
     @Override
-    public void runOpMode() throws InterruptedException
-    {
+    public void runOpMode() throws InterruptedException {
         //Init
         robot.init(hardwareMap);
 
-        //robot.imu.initialize(parameters);
-        //Need to test to see if this fixes the running part.
-
+        //TODO lower lift and move away servo
 
         waitForStart();
-        robot.imu.startAccelerationIntegration(new Position(), new Velocity(), 1000);
+        robot.sampleMove();
+        robot.gyroMove(38,1);
+        robot.detector.disable();
 
-        //TODO must lower the robot and take out the servo
-
-        robot.move(-20, .5);
-        robot.turn(-90, 1);
-        robot.move(49,.5);
-        robot.turn(45, 1);
-        robot.move(40, .5);
-
-        //TODO Drop the Team Marker
-
+        //TODO drop team marker
     }
-
-
 }
-

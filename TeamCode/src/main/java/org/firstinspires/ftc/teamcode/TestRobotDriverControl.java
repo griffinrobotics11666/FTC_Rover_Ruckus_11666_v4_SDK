@@ -9,7 +9,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
 @TeleOp(name="Test Driver Control", group="Competition")
-//@Disabled
+@Disabled
 public class TestRobotDriverControl extends LinearOpMode
 {
     private ElapsedTime runtime = new ElapsedTime();
