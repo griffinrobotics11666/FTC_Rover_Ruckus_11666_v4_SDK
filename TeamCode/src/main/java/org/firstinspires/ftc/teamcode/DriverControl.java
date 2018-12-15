@@ -11,7 +11,7 @@ import com.qualcomm.robotcore.util.Range;
 DRIVER MAPPING
 
 Gamepad1
-x:
+x: 180 turn
 y:
 b:
 a:
@@ -83,12 +83,25 @@ public class DriverControl extends LinearOpMode {
         double previousLiftTime = elapsedTime.milliseconds();
         double previousRightTime = elapsedTime.milliseconds();
         double previousLeftTime = elapsedTime.milliseconds();
+        double previousLockTime = elapsedTime.milliseconds();
+
+        int armLock = 0;
         boolean isLiftOpen = false;
         boolean isRightOpen = false;
         boolean isLeftOpen = false;// changed this position.
+        boolean isLocked = false;
+        boolean lastLock = isLocked;
 
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
+
+            if(gamepad2.dpad_down && (elapsedTime.milliseconds() - previousLockTime > cooldownTime)){
+                if(!isLocked){
+                    armLock = robot.middleArm.getCurrentPosition();
+                }
+                isLocked = !isLocked;
+            }
+
 
             //gamepad values
             drive = -gamepad1.left_stick_y;
@@ -101,17 +114,37 @@ public class DriverControl extends LinearOpMode {
             if(gamepad2.left_stick_y <= 0){
                 robot.firstArm.setPower(gamepad2.left_stick_y);
             }
-            if(gamepad2.right_stick_y > 0) {
-                robot.middleArm.setPower(gamepad2.right_stick_y / 3);
+            if(!isLocked) {
+                robot.middleArm.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+                robot.middleArm.setPower(gamepad2.right_stick_y / 2);
             }
-            if(gamepad2.right_stick_y <= 0){
-                robot.middleArm.setPower(gamepad2.right_stick_y / 3);
+            /*
+            if(gamepad2.right_stick_y < 0){
+                robot.middleArm.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+                robot.middleArm.setPower(gamepad2.right_stick_y / 2);
+            }
+            */
+            if(isLocked && gamepad2.right_stick_y == 0){
+                robot.middleArm.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                robot.middleArm.setTargetPosition(armLock);
+                robot.middleArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                robot.middleArm.setPower(.15);
             }
 
+/*
+            if(isLocked && !lastLock)
+            {
+                robot.middleArm.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                robot.middleArm.setTargetPosition(armLock);
+                robot.middleArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                robot.middleArm.setPower(.15);
+            }
+            lastLock = isLocked;
+*/
             if (gamepad1.x) {
                 robot.turn(180, 1);
             }
-//
+
 //            if (gamepad2.a){
 //                robot.rightServoOpen();
 //            }
@@ -217,21 +250,23 @@ public class DriverControl extends LinearOpMode {
                 robot.leftBack.setPower(speedLeftBack);
 
                 //Telemetry
-                telemetry.addData("Status", "Run Time: " + elapsedTime.toString());
-                telemetry.addData("RT ms: ", elapsedTime.milliseconds());
-                telemetry.addData("left servo position:", robot.leftServo.getPosition());
-                telemetry.addData("right servo position:", robot.rightServo.getPosition());
-                telemetry.addData("Lift Servo Position:", robot.liftServo.getPosition());
-                telemetry.addData("Lift motor Encoder Value:", robot.lift.getCurrentPosition());
-                telemetry.addData("First arm motor", robot.firstArm.getCurrentPosition());
-                telemetry.addData("Arm joint motor", robot.middleArm.getCurrentPosition());
-                telemetry.addData("right Open?", isRightOpen);
-                telemetry.addData("left Open?", isLeftOpen);
-                telemetry.addData("Is Top?", robot.isTop);
-                telemetry.addData("Left Previous Time", previousLeftTime);
-                telemetry.addData("Right Previous Time", previousRightTime);
-                telemetry.addData("Lift Previous Time", previousLiftTime);
-                telemetry.update();
+            telemetry.addData("Is the arm locked?", isLocked);
+            telemetry.addData("Arm Power:", gamepad2.right_stick_y / 2);
+            telemetry.addData("Status", "Run Time: " + elapsedTime.toString());
+            telemetry.addData("RT ms: ", elapsedTime.milliseconds());
+            telemetry.addData("left servo position:", robot.leftServo.getPosition());
+            telemetry.addData("right servo position:", robot.rightServo.getPosition());
+            telemetry.addData("Lift Servo Position:", robot.liftServo.getPosition());
+            telemetry.addData("Lift motor Encoder Value:", robot.lift.getCurrentPosition());
+            telemetry.addData("First arm motor", robot.firstArm.getCurrentPosition());
+            telemetry.addData("Arm joint motor", robot.middleArm.getCurrentPosition());
+            telemetry.addData("right Open?", isRightOpen);
+            telemetry.addData("left Open?", isLeftOpen);
+            telemetry.addData("Is Top?", robot.isTop);
+            telemetry.addData("Left Previous Time", previousLeftTime);
+            telemetry.addData("Right Previous Time", previousRightTime);
+            telemetry.addData("Lift Previous Time", previousLiftTime);
+            telemetry.update();
             }
             robot.detector.disable();
         }

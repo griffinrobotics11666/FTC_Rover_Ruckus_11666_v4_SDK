@@ -42,7 +42,6 @@ public class AutonomousMode extends LinearOpMode {
         robot.imu.startAccelerationIntegration(new Position(), new Velocity(), 1000);
 
         //Do stuff
-        robot.sampleMove();
         //TODO Rewrite SampleMove in Autonomous to use sleep or other functions
 
         robot.turn(-90,1);
