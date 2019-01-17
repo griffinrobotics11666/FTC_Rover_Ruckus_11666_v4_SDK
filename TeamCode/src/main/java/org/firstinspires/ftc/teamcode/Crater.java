@@ -39,7 +39,7 @@ public class Crater extends LinearOpMode{
         double strafeDistance = 14.5;
         double movementSpeed = 1;
         robot.gyroMove(-16, 1);
-        robot.markerServoCLose();
+        robot.markerServoClose();
         robot.strafe(-1.1*strafeDistance, strafeSpeed); //strafe right
         int forwardMovement = 10;
         int goldLocation = 1;
@@ -108,7 +108,7 @@ public class Crater extends LinearOpMode{
         double strafeDistance = 14.5;
         double movementSpeed = 1;
         robot.gyroMove(-16, 1);
-        robot.markerServoCLose();
+        robot.markerServoClose();
         int forwardMovement = 10;
         int goldLocation = 1;
         int scanNumber = 5;
@@ -155,58 +155,63 @@ public class Crater extends LinearOpMode{
         int goldLocation;
         double centerSpaceAngle = 10;
         double strafeDistance = 14.5;
-        double forwardMovement = 10;
+        double forwardMovement = 13;
         double movementSpeed = 1;
         double strafeSpeed = 1;
-        double turnSpeed = 1;
+        double turnSpeed = .5;
         double turningSpeed = 1;
+        robot.gyroMove(-14, 1);
         double startAngle = robot.getCurrentAngle();
         robot.turn(60,turningSpeed);
 
+
+        //TODO if not see gold, then stop
         while(!robot.detector.getAligned()){
             robot.leftBack.setPower(turnSpeed);
             robot.leftFront.setPower(turnSpeed);
             robot.rightBack.setPower(-turnSpeed);
             robot.rightFront.setPower(-turnSpeed);
+            telemetry.addData("Current angle", robot.getCurrentAngle());
+            telemetry.update();
         }
         robot.stopRobot();
+
 
         double newAngle = robot.getNewAngle();
         double differenceAngle = newAngle - startAngle;
 
-        if (differenceAngle > centerSpaceAngle ){
+
+        if (differenceAngle > centerSpaceAngle){
             //then on left
             goldLocation = -1;
         }
-        else if (differenceAngle < centerSpaceAngle){
+        else if (differenceAngle < -centerSpaceAngle){
             // then on right
             goldLocation = 1;
         }else {
             //middle!
             goldLocation = 0;
         }
-        robot.turn(-differenceAngle,turningSpeed);  //robot is turned to straight
+
+        telemetry.addData("newAngle",newAngle);
+        telemetry.addData("Difference Angle", differenceAngle);
+        telemetry.addData("gold location", goldLocation);
+        telemetry.update();
+
+        robot.turn(-differenceAngle,.5);  //robot is turned to straight
 
         if (goldLocation == 0){
             robot.gyroMove(-forwardMovement,movementSpeed);
-            robot.gyroMove(forwardMovement,movementSpeed);
+            robot.gyroMove(forwardMovement - 2,movementSpeed);
         }else if (goldLocation == 1){
-            robot.strafe(strafeDistance,strafeSpeed);
-            robot.gyroMove(-forwardMovement,movementSpeed);
-            robot.gyroMove(forwardMovement,movementSpeed);
-        }else {
             robot.strafe(-strafeDistance,strafeSpeed);
             robot.gyroMove(-forwardMovement,movementSpeed);
-            robot.gyroMove(forwardMovement,movementSpeed);
+            robot.gyroMove(forwardMovement - 4,movementSpeed);
+        }else {
+            robot.strafe(strafeDistance,strafeSpeed);
+            robot.gyroMove(-forwardMovement,movementSpeed);
+            robot.gyroMove(forwardMovement - 2,movementSpeed);
         }
-
-
-
-
-
-
-
-
 
         return goldLocation;
     }
@@ -224,14 +229,33 @@ public class Crater extends LinearOpMode{
 //        robot.imu.startAccelerationIntegration(new Position(), new Velocity(), 1000);
 
         //TODO must lower the robot and take out the servo
-        robot.lift(1);
-        sleep(2000);
-        robot.liftServoOpen();
+//        robot.lift(1);
+//        sleep(2000);
+//        robot.liftServoOpen();
 
 
-        int goldLocation = sampleMove2();
+        int goldLocation = sampleMove4();
         robot.detector.disable();
-//        robot.turn(270,1);
+        robot.turn(-90,1);
+        if(goldLocation == -1) {
+            robot.gyroMove(29, 1);
+        }
+        if(goldLocation == 0){
+            robot.gyroMove(29 + 14.5,1);
+        }
+        if(goldLocation == 1){
+            robot.gyroMove(29 + 14.5 + 14.5,1);
+        }
+        robot.turn(45,1);
+        robot.gyroMove(44,1);
+        robot.turn(45,1);
+        robot.gyroMove(5,1);
+        robot.markerServoOpen();
+        sleep(200);
+        robot.markerServoClose();
+        robot.gyroMove(-5,1);
+        robot.turn(-45,1);
+        robot.gyroMove(-70,1);
 
 //        if (goldLocation == 1){
 //            robot.gyroMove(60,1);
@@ -242,6 +266,7 @@ public class Crater extends LinearOpMode{
 //        if (goldLocation == -1){
 //            robot.gyroMove(60 - 14.5 - 14.5, 1);
 //    }
+//        robot.markerServoOpen ();
 //        //TODO tweak the  code so it
 //        robot.turn(42.5,1);
 //        robot.gyroMove(46,1);

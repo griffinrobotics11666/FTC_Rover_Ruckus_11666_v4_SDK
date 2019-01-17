@@ -32,7 +32,7 @@ public class Depot extends LinearOpMode {
         double strafeDistance = 14.5;
         double movementSpeed = 1;
         robot.gyroMove(-16, 1);
-        robot.markerServoCLose();
+        robot.markerServoClose();
         robot.strafe(-1.1 * strafeDistance, strafeSpeed); //strafe right
         int forwardMovement = 10;
         int goldLocation = 1;
@@ -42,7 +42,7 @@ public class Depot extends LinearOpMode {
 
         sleep(100);
         int sleepTimer = 0;
-        while (!robot.detector.isFound() && sleepTimer < timeOut + 20) {
+        while (!robot.detector.isFound() && (sleepTimer < timeOut + 20) && opModeIsActive()) {
             sleep(scanDuration);
             sleepTimer += scanDuration;
         }
@@ -89,6 +89,67 @@ public class Depot extends LinearOpMode {
         }
         return goldLocation;
     }
+    public int sampleMove4(){
+        int goldLocation;
+        double centerSpaceAngle = 10;
+        double strafeDistance = 14.5;
+        double forwardMovement = 13;
+        double movementSpeed = 1;
+        double strafeSpeed = 1;
+        double turnSpeed = .5;
+        double turningSpeed = 1;
+        robot.gyroMove(-14, 1);
+        double startAngle = robot.getCurrentAngle();
+        robot.turn(60,turningSpeed);
+
+
+        //TODO if not see gold, then stop
+        while(!robot.detector.getAligned()){
+            robot.leftBack.setPower(turnSpeed);
+            robot.leftFront.setPower(turnSpeed);
+            robot.rightBack.setPower(-turnSpeed);
+            robot.rightFront.setPower(-turnSpeed);
+            telemetry.addData("Current angle", robot.getCurrentAngle());
+            telemetry.update();
+        }
+        robot.stopRobot();
+
+
+        double newAngle = robot.getNewAngle();
+        double differenceAngle = newAngle - startAngle;
+
+
+        if (differenceAngle > centerSpaceAngle){
+            //then on left
+            goldLocation = -1;
+        }
+        else if (differenceAngle < -centerSpaceAngle){
+            // then on right
+            goldLocation = 1;
+        }else {
+            //middle!
+            goldLocation = 0;
+        }
+
+        telemetry.addData("newAngle",newAngle);
+        telemetry.addData("Difference Angle", differenceAngle);
+        telemetry.addData("gold location", goldLocation);
+        telemetry.update();
+
+        robot.turn(-differenceAngle,.5);  //robot is turned to straight
+
+        if (goldLocation == 0){
+            robot.gyroMove(-forwardMovement,movementSpeed);
+        }else if (goldLocation == 1){
+            robot.strafe(-strafeDistance,strafeSpeed);
+            robot.gyroMove(-forwardMovement,movementSpeed);
+        }else {
+            robot.strafe(strafeDistance,strafeSpeed);
+            robot.gyroMove(-forwardMovement,movementSpeed);
+        }
+
+        return goldLocation;
+    }
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -99,14 +160,40 @@ public class Depot extends LinearOpMode {
 
         waitForStart();
 
-        robot.lift(1);
-        robot.liftServoOpen();
-        sampleMove2();
+//        robot.lift(1);
+//        robot.liftServoOpen();
+        int goldPosition = sampleMove4();
+        robot.gyroMove(-23,1);
+        robot.turn(-90,1);
+
+        if(goldPosition == -1){
+            robot.markerServoOpen();
+            sleep(1500);
+            robot.markerServoClose();
+        }
+        if(goldPosition == 0){
+            robot.markerServoOpen();
+            sleep(1500);
+            robot.markerServoClose();
+            robot.gyroMove(14.5,1);
+        }
+        if(goldPosition == 1){
+            robot.gyroMove(14.5,1);
+            robot.markerServoOpen();
+            sleep(1500);
+            robot.markerServoClose();
+            robot.gyroMove(14.5,1);
+        }
+        robot.turn(45,1);
+        robot.gyroMove(54,1);
+
         robot.detector.disable();
-        robot.gyroMove(-38,1);
-        robot.markerServoCLose();
-        robot.gyroMove(20,1);
-        robot.turn(290,1);
+
+//        robot.detector.disable();
+//        robot.gyroMove(-38,1);
+//        robot.markerServoClose();
+//        robot.gyroMove(20,1);
+//        robot.turn(290,1);
 
         //strafe?
 

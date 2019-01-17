@@ -92,8 +92,13 @@ public class DriverControl extends LinearOpMode {
         boolean isLocked = false;
         boolean lastLock = isLocked;
 
+        double firstArmPower;
+        //true if not pressed
+        boolean isPressed = !robot.button.getState();
+
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
+            isPressed = !robot.button.getState();
 
             if(gamepad2.dpad_down && (elapsedTime.milliseconds() - previousLockTime > cooldownTime)){
                 if(!isLocked){
@@ -106,14 +111,24 @@ public class DriverControl extends LinearOpMode {
             //gamepad values
             drive = -gamepad1.left_stick_y;
             turn = gamepad1.left_stick_x;
-            strafe = gamepad1.right_stick_x;
+            //strafe = gamepad1.right_stick_x;
+            //changed strafe to be on triggers for Gamepad1
+            strafe = gamepad1.right_trigger - gamepad1.left_trigger;
 
-            if(gamepad2.left_stick_y > 0) {
-                robot.firstArm.setPower(gamepad2.left_stick_y);
+
+
+            firstArmPower = gamepad2.left_stick_y;
+
+
+            //TODO Vo needs to change this so it doesn't just skip a lot.  Positive rotates arm up!
+            if(isPressed){
+                firstArmPower = Math.abs(firstArmPower);
             }
-            if(gamepad2.left_stick_y <= 0){
-                robot.firstArm.setPower(gamepad2.left_stick_y);
-            }
+
+            robot.firstArm.setPower(firstArmPower);
+
+
+
             if(!isLocked) {
                 robot.middleArm.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                 robot.middleArm.setPower(gamepad2.right_stick_y / 2);
@@ -160,94 +175,92 @@ public class DriverControl extends LinearOpMode {
 //            }
 
 
-                if (gamepad2.right_bumper && (elapsedTime.milliseconds() - previousLeftTime > cooldownTime)) {
-                    if (isLeftOpen) {
-                        robot.leftServoClose();
-                    }
-                    if (!isLeftOpen) {
-                        robot.leftServoOpen();
-                    }
-                    isLeftOpen = !isLeftOpen;
-                    previousLeftTime = elapsedTime.milliseconds();
+            if (gamepad2.right_bumper && (elapsedTime.milliseconds() - previousLeftTime > cooldownTime)) {
+                if (isLeftOpen) {
+                    robot.leftServoClose();
+                }
+                if (!isLeftOpen) {
+                    robot.leftServoOpen();
+                }
+                isLeftOpen = !isLeftOpen;
+                previousLeftTime = elapsedTime.milliseconds();
             }
-                if (gamepad2.left_bumper && (elapsedTime.milliseconds() - previousRightTime > cooldownTime)) {
-                    if (isRightOpen) {
-                        robot.rightServoClose();
-                    }
-                    if (!isRightOpen) {
-                        robot.rightServoOpen();
-                    }
-                    isRightOpen = !isRightOpen;
-                    previousRightTime = elapsedTime.milliseconds();
+            if (gamepad2.left_bumper && (elapsedTime.milliseconds() - previousRightTime > cooldownTime)) {
+                if (isRightOpen) {
+                    robot.rightServoClose();
+                }
+                if (!isRightOpen) {
+                    robot.rightServoOpen();
+                }
+                isRightOpen = !isRightOpen;
+                previousRightTime = elapsedTime.milliseconds();
             }
 
-                if (gamepad1.left_bumper && (elapsedTime.milliseconds() - previousLiftTime > cooldownTime)) {
-                    if (isLiftOpen) {
-                        robot.liftServoClose();
-                    }
-                    if (!isLiftOpen) {
-                        robot.liftServoOpen();
-                    }
-                    isLiftOpen = !isLiftOpen;
-                    previousLiftTime = elapsedTime.milliseconds();
+            if (gamepad1.left_bumper && (elapsedTime.milliseconds() - previousLiftTime > cooldownTime)) {
+                if (isLiftOpen) {
+                    robot.liftServoClose();
                 }
-//            if (gamepad2.right_bumper) {
-//                    robot.liftServoOpen();
-//                }
-//                if (gamepad2.left_bumper) {
-//                    robot.liftServoClose();
-//                }
-
-
-
-            /*
-            if (gamepad2.right_bumper){robot.liftServoClose();  }
-            if (gamepad2.left_bumper) {robot.liftServoOpen();   }
-            */
-                if (gamepad1.dpad_up || gamepad2.dpad_up) {
-                    robot.lift(1);
+                if (!isLiftOpen) {
+                    robot.liftServoOpen();
+                }
+                isLiftOpen = !isLiftOpen;
+                previousLiftTime = elapsedTime.milliseconds();
                 }
 
-                if (gamepad2.right_trigger > 0) {
-                    robot.lift.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-                    robot.lift.setPower(gamepad2.right_trigger);
-                }
-                else if (gamepad2.left_trigger > 0) {
-                    robot.lift.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-                    robot.lift.setPower(-gamepad2.left_trigger);
-                }
-                else
-                {
-                    robot.lift.setPower(0);
-                }
 
-                if (gamepad2.dpad_left) {
-                    robot.lift.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-                    robot.lift.setPower(0);
-                }
 
-                //toggle speed for fine adjustment
-                if (gamepad1.right_bumper) {
-                    maxSpeed = topSpeed / 3;
-                } else {
-                    maxSpeed = topSpeed;
-                }
 
-                //robot.detector.disable();
+//            if (gamepad1.dpad_up || gamepad2.dpad_up) {
+//                robot.lift(1);
+//            }
 
-                //arm control
+            if (gamepad2.right_trigger > 0) {
+                robot.lift.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+                robot.lift.setPower(gamepad2.right_trigger);
+            }
+            else if (gamepad2.left_trigger > 0) {
+                robot.lift.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+                robot.lift.setPower(-gamepad2.left_trigger);
+            }
+            else
+            {
+                robot.lift.setPower(0);
+            }
 
-                //RANGE CLIP
-                speedLeftFront = Range.clip(drive + turn + strafe, -maxSpeed, maxSpeed);
-                speedRightFront = Range.clip(drive - turn + strafe, -maxSpeed, maxSpeed);
-                speedLeftBack = Range.clip(drive + turn - strafe, -maxSpeed, maxSpeed);
-                speedRightBack = Range.clip(drive - turn - strafe, -maxSpeed, maxSpeed);
+            if (gamepad2.dpad_left) {
+                robot.lift.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+                robot.lift.setPower(0);
+            }
 
-                //set motor speed
-                robot.leftFront.setPower(speedLeftFront);
-                robot.rightFront.setPower(speedRightFront);
-                robot.rightBack.setPower(speedRightBack);
-                robot.leftBack.setPower(speedLeftBack);
+            //toggle speed for fine adjustment
+            if (gamepad1.right_bumper) {
+                maxSpeed = topSpeed / 2.5; //was 3 on 1/5/19
+            } else {
+                maxSpeed = topSpeed;
+            }
+
+            if (gamepad2.a)
+            {
+                robot.markerServoOpen();
+            }
+            if (gamepad2.b)
+            {
+                robot.markerServoClose();
+            }
+
+            //arm control
+
+            //RANGE CLIP
+            speedLeftFront = Range.clip(drive + turn + strafe, -maxSpeed, maxSpeed);
+            speedRightFront = Range.clip(drive - turn + strafe, -maxSpeed, maxSpeed);
+            speedLeftBack = Range.clip(drive + turn - strafe, -maxSpeed, maxSpeed);
+            speedRightBack = Range.clip(drive - turn - strafe, -maxSpeed, maxSpeed);
+
+            //set motor speed
+            robot.leftFront.setPower(speedLeftFront);
+            robot.rightFront.setPower(speedRightFront);
+            robot.rightBack.setPower(speedRightBack);
+            robot.leftBack.setPower(speedLeftBack);
 
                 //Telemetry
             telemetry.addData("Is the arm locked?", isLocked);

@@ -8,7 +8,8 @@ import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.robotcore.hardware.DistanceSensor;
+import com.qualcomm.robotcore.hardware.DigitalChannel;
+//import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.hardware.rev.Rev2mDistanceSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
@@ -54,7 +55,9 @@ public class HardwareRobot {
     public boolean isTopElbow = false;
     public boolean isTopArm = false;
 
-    public DistanceSensor sensorRange;
+    DigitalChannel button;
+
+    //public DistanceSensor sensorRange;
     //Rev2mDistanceSensor sensorTimeOfFlight = (Rev2mDistanceSensor)sensorRange;
     //public  Servo servo = null;
     public boolean ishome = true;
@@ -67,6 +70,7 @@ public class HardwareRobot {
 
     public GoldAlignDetector detector;
     int centerValue = 290;
+
 
 
 
@@ -88,64 +92,86 @@ public class HardwareRobot {
     public void init(HardwareMap ahwMap) {
         hwMap = ahwMap;
         // assign devices to config
+
+        //Base motors
         leftFront = hwMap.get(DcMotor.class, "motor_1");
         leftBack = hwMap.get(DcMotor.class, "motor_2");
         rightBack = hwMap.get(DcMotor.class, "motor_3");
         rightFront = hwMap.get(DcMotor.class, "motor_4");
 
+        //arm motors
         firstArm = hwMap.get(DcMotor.class, "firstArm");
         middleArm = hwMap.get(DcMotor.class, "middleArm");
 
+        //lift motor
         lift = hwMap.get(DcMotor.class, "lift");
 
-        sensorRange = hwMap.get(DistanceSensor.class, "sensor_range");
+        //distance sensor
+        //sensorRange = hwMap.get(DistanceSensor.class, "sensor_range");
 
+        //button
+        button = hwMap.get(DigitalChannel.class,"button");
+
+        //arm servos
         leftServo = hwMap.get(Servo.class, "leftServo");
         rightServo = hwMap.get(Servo.class, "rightServo");
+
+        //lift servo
         liftServo = hwMap.get(Servo.class, "liftServo");
 
+        //marker servo
         markerServo = hwMap.get(Servo.class, "markerServo");
 
+        //lift motor setup
         lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         lift.setDirection(DcMotor.Direction.REVERSE); //changed direction
-        /* servo = hwMap.get(Servo.class, "servo_1");
-        //set motor direction*/
+
+        //middle arm reset encoder
         middleArm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
+        //base motors set direction
         leftFront.setDirection(DcMotor.Direction.REVERSE);
         rightFront.setDirection(DcMotor.Direction.FORWARD);
         rightBack.setDirection(DcMotor.Direction.FORWARD);
         leftBack.setDirection(DcMotor.Direction.REVERSE);
 
+        //arm motors set direction
         firstArm.setDirection(DcMotorSimple.Direction.REVERSE);
         middleArm.setDirection(DcMotorSimple.Direction.FORWARD);
 
+        //base motors what happens when given 0 power
         leftFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         leftBack.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         rightFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         rightBack.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
+        //arm motors what happens when given 0 power
         firstArm.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         middleArm.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
-        //set motor power
+        //set digital channel to input
+        button.setMode(DigitalChannel.Mode.INPUT);
+
+        //set base motor power
         leftFront.setPower(0);
         leftBack.setPower(0);
         rightBack.setPower(0);
         rightFront.setPower(0);
 
+        //set arm motor power
         firstArm.setPower(0);
         middleArm.setPower(0);
 
+        //set lift motor power
         lift.setPower(0);
 
         //set servo to initial position
-        /*servo.setPosition(servoHomePosition);*/
         liftServo.setPosition(.3);
-        markerServoOpen();
+        markerServoClose();
         leftServo.setPosition(constants.getLeftServoClose());
         rightServo.setPosition(constants.getRightServoClose());
 
+        //gyro stuff
         BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
         parameters.angleUnit = BNO055IMU.AngleUnit.DEGREES;
         parameters.calibrationDataFile = "BNO055IMUCalibration.json";
@@ -155,6 +181,7 @@ public class HardwareRobot {
         imu = hwMap.get(BNO055IMU.class, "imu");
         imu.initialize(parameters);
 
+        //detector stuff
         detector = new GoldAlignDetector();
         detector.init(hwMap.appContext, CameraViewDisplay.getInstance());
         detector.useDefaults();
@@ -266,9 +293,9 @@ public class HardwareRobot {
 
         angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
 
-        double initalAngle = angles.firstAngle;
+        double initialAngle = angles.firstAngle;
         double motorPower;
-        double minMotorPower = 0.5;
+        double minMotorPower = 0.5 ;
         double powerScaleFactor;
         double targetAngle;
         double currentAngle;
@@ -276,15 +303,19 @@ public class HardwareRobot {
         double robotAngle = angles.firstAngle;
         double previousAngle = angles.firstAngle;
 
-        targetAngle = initalAngle + angle;
+        targetAngle = initialAngle + angle;
 
-        while (Math.abs(targetAngle - robotAngle)> .25)
+        while (Math.abs(targetAngle - robotAngle)> .5)
         {
             angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
             currentAngle = angles.firstAngle;
 
             //update speed dynamically to slow when approaching the target
             powerScaleFactor = Math.sqrt(Math.abs((targetAngle-robotAngle)/angle));
+            if (powerScaleFactor > 1)
+            {
+                powerScaleFactor = 1;
+            }
             motorPower = powerScaleFactor*speed;
             if (motorPower < minMotorPower)
             {
@@ -333,16 +364,16 @@ public class HardwareRobot {
         stopRobot();
     }
 
-    public double getDistance(){
-        int count = 10;
-
-        for (int i = 0; i < count ; i++) {
-            distance =+ sensorRange.getDistance(DistanceUnit.INCH);
-        }
-        distance = distance / count;
-
-        return distance;
-    }
+//    public double getDistance(){
+//        int count = 10;
+//
+//        for (int i = 0; i < count ; i++) {
+//            distance =+ sensorRange.getDistance(DistanceUnit.INCH);
+//        }
+//        distance = distance / count;
+//
+//        return distance;
+//    }
 
     public void strafe(double distance, double speed){
         int newLeftFrontTarget;
@@ -385,7 +416,7 @@ public class HardwareRobot {
         leftBack.setPower(Math.abs(speed)); //-
         rightBack.setPower(Math.abs(speed)); //-
 
-        while (leftBack.isBusy() || rightFront.isBusy() || rightBack.isBusy() || leftFront.isBusy())
+        while (leftBack.isBusy() && rightFront.isBusy() && rightBack.isBusy() && leftFront.isBusy())
         {
             telemetry.addData("Left Front:", leftFront.getCurrentPosition());
             telemetry.addData("Left Back:", leftBack.getCurrentPosition());
@@ -729,10 +760,10 @@ public class HardwareRobot {
 //    }
 
     public void markerServoOpen(){
-        markerServo.setPosition(0.45);
+        markerServo.setPosition(0.22);
     }
-    public void markerServoCLose(){
-        markerServo.setPosition(0);
+    public void markerServoClose(){
+        markerServo.setPosition(0.928);
     }
 
     public void armDown(double speed){

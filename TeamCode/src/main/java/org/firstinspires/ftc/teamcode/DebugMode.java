@@ -144,7 +144,7 @@ public class DebugMode extends LinearOpMode{
                 robot.markerServoOpenDebug();
             }
             if (gamepad1.b){
-                robot.markerServoCloseDebug();
+                robot.markerServoClose();
             }
 
 
@@ -224,6 +224,7 @@ public class DebugMode extends LinearOpMode{
                 robot.leftBack.setPower(speedLeftBack);
 
                 //Telemetry
+                telemetry.addData("marker servo position",robot.markerServo.getPosition());
                 telemetry.addData("Is the arm locked?", isLocked);
                 telemetry.addData("Arm Power:", gamepad2.right_stick_y / 2);
                 telemetry.addData("Status", "Run Time: " + elapsedTime.toString());
