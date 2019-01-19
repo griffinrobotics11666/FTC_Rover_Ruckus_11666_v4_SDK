@@ -9,7 +9,7 @@ import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
-//import com.qualcomm.robotcore.hardware.DistanceSensor;
+import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.hardware.rev.Rev2mDistanceSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
@@ -34,6 +34,7 @@ public class HardwareRobot {
     public DcMotor rightBack = null;
     public DcMotor lift = null;
     public int liftSpeed = 1;
+    public DcMotor feeder = null;
 
     public DcMotor firstArm = null;
     public DcMotor middleArm = null;
@@ -48,7 +49,8 @@ public class HardwareRobot {
 
     int direction;
 
-    double distance;
+    double distanceFront;
+    double distanceBack;
 
     public boolean extendedMarker = false;
 
@@ -57,9 +59,9 @@ public class HardwareRobot {
 
     DigitalChannel button;
 
-    //public DistanceSensor sensorRange;
-    //Rev2mDistanceSensor sensorTimeOfFlight = (Rev2mDistanceSensor)sensorRange;
-    //public  Servo servo = null;
+    public DistanceSensor sensorRangeFront;
+    public DistanceSensor sensorRangeBack;
+    public  Servo servo = null;
     public boolean ishome = true;
     BNO055IMU imu;
     Orientation angles;
@@ -106,8 +108,13 @@ public class HardwareRobot {
         //lift motor
         lift = hwMap.get(DcMotor.class, "lift");
 
-        //distance sensor
-        //sensorRange = hwMap.get(DistanceSensor.class, "sensor_range");
+        //Feeder motor
+        feeder = hwMap.get(DcMotor.class, "feeder");
+
+
+        sensorRangeFront = hwMap.get(DistanceSensor.class, "sensor_range_front");
+        sensorRangeBack = hwMap.get(DistanceSensor.class, "sensor_range_back");
+
 
         //button
         button = hwMap.get(DigitalChannel.class,"button");
@@ -139,6 +146,9 @@ public class HardwareRobot {
         firstArm.setDirection(DcMotorSimple.Direction.REVERSE);
         middleArm.setDirection(DcMotorSimple.Direction.FORWARD);
 
+        //Feeder motor set direction
+        feeder.setDirection(DcMotorSimple.Direction.FORWARD);
+
         //base motors what happens when given 0 power
         leftFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         leftBack.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -148,6 +158,9 @@ public class HardwareRobot {
         //arm motors what happens when given 0 power
         firstArm.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         middleArm.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+        //Feeder motors what happens at 0 power
+        feeder.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         //set digital channel to input
         button.setMode(DigitalChannel.Mode.INPUT);
@@ -166,7 +179,7 @@ public class HardwareRobot {
         lift.setPower(0);
 
         //set servo to initial position
-        liftServo.setPosition(0.1); //TODO Change
+        liftServo.setPosition(constants.getLiftServoClose()); //TODO Change
         markerServoClose();
         leftServo.setPosition(constants.getLeftServoClose());
         rightServo.setPosition(constants.getRightServoClose());
@@ -368,16 +381,26 @@ public class HardwareRobot {
         stopRobot();
     }
 
-//    public double getDistance(){
-//        int count = 10;
-//
-//        for (int i = 0; i < count ; i++) {
-//            distance =+ sensorRange.getDistance(DistanceUnit.INCH);
-//        }
-//        distance = distance / count;
-//
-//        return distance;
-//    }
+    public double getFrontDistance(){
+        int count = 10;
+
+        for (int i = 0; i < count ; i++) {
+            distanceFront =+ sensorRangeFront.getDistance(DistanceUnit.INCH);
+        }
+        distanceFront = distanceFront / count;
+
+        return distanceFront;
+    }
+    public double getBackDistance(){
+        int count = 10;
+
+        for (int i = 0; i < count ; i++) {
+            distanceBack =+ sensorRangeBack.getDistance(DistanceUnit.INCH);
+        }
+        distanceBack = distanceBack / count;
+
+        return distanceBack;
+    }
 
     public void strafe(double distance, double speed){
         int newLeftFrontTarget;

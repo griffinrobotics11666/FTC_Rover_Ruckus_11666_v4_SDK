@@ -84,17 +84,22 @@ public class DriverControl extends LinearOpMode {
         double previousRightTime = elapsedTime.milliseconds();
         double previousLeftTime = elapsedTime.milliseconds();
         double previousLockTime = elapsedTime.milliseconds();
+        double previousFeederTime = elapsedTime.milliseconds();
+        double previousFeederSwitch = elapsedTime.milliseconds();
 
         int armLock = 0;
         boolean isLiftOpen = false;
         boolean isRightOpen = false;
         boolean isLeftOpen = false;// changed this position.
         boolean isLocked = false;
+        boolean isFeederOn = false;
+        boolean isFeederForward = false;
         boolean lastLock = isLocked;
 
         double firstArmPower;
         //true if not pressed
         boolean isPressed = !robot.button.getState();
+        double feederPower = 0;
 
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
@@ -106,6 +111,20 @@ public class DriverControl extends LinearOpMode {
                 }
                 isLocked = !isLocked;
             }
+
+            if (gamepad2.x && (elapsedTime.milliseconds() - previousFeederTime > cooldownTime)){
+                if (isFeederOn){
+                    feederPower = 0;
+                }
+                if(!isFeederOn){
+                    feederPower = 1;
+                }
+                isFeederOn = !isFeederOn;
+            }
+            if(gamepad2.y && (elapsedTime.milliseconds() - previousFeederSwitch > cooldownTime)){
+                feederPower = -feederPower;
+            }
+            robot.feeder.setPower(feederPower);
 
 
             //gamepad values
@@ -185,6 +204,7 @@ public class DriverControl extends LinearOpMode {
                 isLeftOpen = !isLeftOpen;
                 previousLeftTime = elapsedTime.milliseconds();
             }
+            //This is now the feeder servo
             if (gamepad2.left_bumper && (elapsedTime.milliseconds() - previousRightTime > cooldownTime)) {
                 if (isRightOpen) {
                     robot.rightServoClose();
