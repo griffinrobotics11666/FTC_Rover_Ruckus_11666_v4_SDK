@@ -24,10 +24,10 @@ public class RobotConstants {
         return 10950;
     }
     public double getLiftServoOpen(){
-        return .167;
+        return .4677;
     }
     public double getLiftServoClose(){
-        return .1;
+        return .403;
         //.32
     }
     public double getLeftServoOpen(){

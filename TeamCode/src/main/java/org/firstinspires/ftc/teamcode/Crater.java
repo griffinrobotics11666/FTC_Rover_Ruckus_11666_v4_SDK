@@ -251,7 +251,7 @@ public class Crater extends LinearOpMode{
         robot.turn(45,1);
         robot.gyroMove(5,1);
         robot.markerServoOpen();
-        sleep(200);
+        sleep(1500);
         robot.markerServoClose();
         robot.gyroMove(-5,1);
         robot.turn(-45,1);
