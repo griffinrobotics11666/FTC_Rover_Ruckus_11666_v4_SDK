@@ -131,7 +131,7 @@ public class DriverControl extends LinearOpMode {
 
             if(!isLocked) {
                 robot.middleArm.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-                robot.middleArm.setPower(gamepad2.right_stick_y / 2);
+                robot.middleArm.setPower(gamepad2.right_stick_y);
             }
             /*
             if(gamepad2.right_stick_y < 0){

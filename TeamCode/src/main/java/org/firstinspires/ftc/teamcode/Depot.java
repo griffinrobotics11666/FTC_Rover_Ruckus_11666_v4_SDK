@@ -91,7 +91,7 @@ public class Depot extends LinearOpMode {
     }
     public int sampleMove4(){
         int goldLocation;
-        double centerSpaceAngle = 10;
+        double centerSpaceAngle = 15;
         double strafeDistance = 14.5;
         double forwardMovement = 13;
         double movementSpeed = 1;
@@ -170,6 +170,8 @@ public class Depot extends LinearOpMode {
             robot.markerServoOpen();
             sleep(1500);
             robot.markerServoClose();
+            robot.turn(5,.5);
+            robot.gyroMove(3,1);
         }
         if(goldPosition == 0){
             robot.markerServoOpen();
@@ -185,7 +187,10 @@ public class Depot extends LinearOpMode {
             robot.gyroMove(14.5,1);
         }
         robot.turn(45,1);
-        robot.gyroMove(54,1);
+        if (goldPosition == -1){
+            robot.gyroMove(3,1);
+        }
+        robot.gyroMove(58,1);
 
         robot.detector.disable();
 
@@ -196,7 +201,5 @@ public class Depot extends LinearOpMode {
 //        robot.turn(290,1);
 
         //strafe?
-
-        //TODO drop team marker
     }
 }

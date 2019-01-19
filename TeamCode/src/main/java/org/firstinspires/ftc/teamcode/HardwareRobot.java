@@ -166,7 +166,7 @@ public class HardwareRobot {
         lift.setPower(0);
 
         //set servo to initial position
-        liftServo.setPosition(.3);
+        liftServo.setPosition(0.1); //TODO Change
         markerServoClose();
         leftServo.setPosition(constants.getLeftServoClose());
         rightServo.setPosition(constants.getRightServoClose());
@@ -278,7 +278,7 @@ public class HardwareRobot {
         stopRobot();
     }
 
-// TURN DOES NOT LIKE NEGATIVE,COUNTER CLOCKWISE IS POS
+// COUNTER CLOCKWISE IS POSITIVE
 
     public void turn(double angle, double speed) {
         leftBack.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -304,6 +304,10 @@ public class HardwareRobot {
         double previousAngle = angles.firstAngle;
 
         targetAngle = initialAngle + angle;
+
+        if (Math.abs(angle) < 8){
+            minMotorPower = .2;
+        }
 
         while (Math.abs(targetAngle - robotAngle)> .5)
         {
