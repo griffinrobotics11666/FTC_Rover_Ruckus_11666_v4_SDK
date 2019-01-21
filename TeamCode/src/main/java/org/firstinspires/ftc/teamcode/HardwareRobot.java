@@ -837,5 +837,32 @@ public class HardwareRobot {
         middleArm.setPower(0);
 
     }
+    public void wallAlign(){
+        double turnSpeed = .5;
+        while (Math.abs(getFrontDistance() - getBackDistance()) > .5){
+            if (getFrontDistance() - getBackDistance() < 0){
+                leftFront.setPower(turnSpeed);
+                leftBack.setPower(turnSpeed);
+                rightBack.setPower(-turnSpeed);
+                rightFront.setPower(-turnSpeed);
+            }else {
+                leftBack.setPower(-turnSpeed);
+                leftFront.setPower(-turnSpeed);
+                rightFront.setPower(turnSpeed);
+                rightBack.setPower(turnSpeed);
+            }
+        }
+        stopRobot();
+    }
+    public void moveToWall(double speed){
+        double distance = 2;
+        while (getFrontDistance() > distance || getBackDistance() > distance){
+            leftFront.setPower(Math.abs(speed));
+            rightFront.setPower(Math.abs(speed));
+            leftBack.setPower(Math.abs(-speed));
+            rightBack.setPower(Math.abs(-speed));
+        }
+        stopRobot();
+    }
 
 }
