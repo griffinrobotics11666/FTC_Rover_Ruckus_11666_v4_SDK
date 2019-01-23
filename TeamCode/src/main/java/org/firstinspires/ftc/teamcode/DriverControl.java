@@ -109,6 +109,7 @@ public class DriverControl extends LinearOpMode {
                 if(!isLocked){
                     armLock = robot.middleArm.getCurrentPosition();
                 }
+                previousLockTime = elapsedTime.milliseconds();
                 isLocked = !isLocked;
             }
 
@@ -117,12 +118,14 @@ public class DriverControl extends LinearOpMode {
                     feederPower = 0;
                 }
                 if(!isFeederOn){
-                    feederPower = 1;
+                    feederPower = -1;
                 }
+                previousFeederTime = elapsedTime.milliseconds();
                 isFeederOn = !isFeederOn;
             }
             if(gamepad2.y && (elapsedTime.milliseconds() - previousFeederSwitch > cooldownTime)){
                 feederPower = -feederPower;
+                previousFeederSwitch = elapsedTime.milliseconds();
             }
             robot.feeder.setPower(feederPower);
 
@@ -130,9 +133,9 @@ public class DriverControl extends LinearOpMode {
             //gamepad values
             drive = -gamepad1.left_stick_y;
             turn = gamepad1.left_stick_x;
-            //strafe = gamepad1.right_stick_x;
+            strafe = gamepad1.right_stick_x;
             //changed strafe to be on triggers for Gamepad1
-            strafe = gamepad1.right_trigger - gamepad1.left_trigger;
+//            strafe = gamepad1.right_trigger - gamepad1.left_trigger;
 
 
 
@@ -178,20 +181,6 @@ public class DriverControl extends LinearOpMode {
             if (gamepad1.x) {
                 robot.turn(180, 1);
             }
-
-//            if (gamepad2.a){
-//                robot.rightServoOpen();
-//            }
-//
-//            if(gamepad2.b){
-//                robot.rightServoClose();
-//            }
-//            if(gamepad2.x){
-//                robot.leftServoOpen();
-//            }
-//            if(gamepad2.y){
-//                robot.leftServoClose();
-//            }
 
 
             if (gamepad2.right_bumper && (elapsedTime.milliseconds() - previousLeftTime > cooldownTime)) {

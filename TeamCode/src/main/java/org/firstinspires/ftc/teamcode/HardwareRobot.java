@@ -49,8 +49,7 @@ public class HardwareRobot {
 
     int direction;
 
-    double distanceFront;
-    double distanceBack;
+
 
     public boolean extendedMarker = false;
 
@@ -382,6 +381,8 @@ public class HardwareRobot {
     }
 
     public double getFrontDistance(){
+        double distanceFront=0;
+
         int count = 10;
 
         for (int i = 0; i < count ; i++) {
@@ -389,9 +390,12 @@ public class HardwareRobot {
         }
         distanceFront = distanceFront / count;
 
-        return distanceFront;
+//        return distanceFront;
+        return sensorRangeFront.getDistance(DistanceUnit.INCH);
     }
     public double getBackDistance(){
+        double distanceBack=0;
+
         int count = 10;
 
         for (int i = 0; i < count ; i++) {
@@ -399,7 +403,8 @@ public class HardwareRobot {
         }
         distanceBack = distanceBack / count;
 
-        return distanceBack;
+//        return distanceBack;
+        return sensorRangeBack.getDistance(DistanceUnit.INCH);
     }
 
     public void strafe(double distance, double speed){
@@ -690,23 +695,23 @@ public class HardwareRobot {
     }
 
     public void leftServoOpenDebug(){
-        leftServo.setPosition(leftServo.getPosition() + .0003);
+        leftServo.setPosition(leftServo.getPosition() + .003);
     }
     public void leftServoCloseDebug(){
-        leftServo.setPosition(leftServo.getPosition() - .0003);
+        leftServo.setPosition(leftServo.getPosition() - .003);
     }
     public void rightServoOpenDebug(){
-        rightServo.setPosition(rightServo.getPosition() + .0003);
+        rightServo.setPosition(rightServo.getPosition() + .003);
     }
     public void rightServoCloseDebug(){
-        rightServo.setPosition(rightServo.getPosition() - .0003);
+        rightServo.setPosition(rightServo.getPosition() - .003);
     }
 
     public void liftServoOpenDebug(){
-        liftServo.setPosition(liftServo.getPosition() + .0003);
+        liftServo.setPosition(liftServo.getPosition() + .003);
     }
     public void liftServoCloseDebug(){
-        liftServo.setPosition(liftServo.getPosition() - .0003);
+        liftServo.setPosition(liftServo.getPosition() - .003);
     }
 
 
@@ -851,6 +856,9 @@ public class HardwareRobot {
                 rightFront.setPower(turnSpeed);
                 rightBack.setPower(turnSpeed);
             }
+            telemetry.addData("Back Distance", getBackDistance());
+            telemetry.addData("Front Distance", getFrontDistance());
+            telemetry.update();
         }
         stopRobot();
     }
