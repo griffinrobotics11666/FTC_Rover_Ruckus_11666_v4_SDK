@@ -86,6 +86,7 @@ public class DriverControl extends LinearOpMode {
         double previousLockTime = elapsedTime.milliseconds();
         double previousFeederTime = elapsedTime.milliseconds();
         double previousFeederSwitch = elapsedTime.milliseconds();
+        double previousRightAutoTime = elapsedTime.milliseconds();
 
         int armLock = 0;
         boolean isLiftOpen = false;
@@ -195,14 +196,19 @@ public class DriverControl extends LinearOpMode {
             }
             //This is now the feeder servo
             if (gamepad2.left_bumper && (elapsedTime.milliseconds() - previousRightTime > cooldownTime)) {
-                if (isRightOpen) {
-                    robot.rightServoClose();
-                }
+//                if (isRightOpen) {
+//                    robot.rightServoClose();
+//                }
                 if (!isRightOpen) {
                     robot.rightServoOpen();
                 }
                 isRightOpen = !isRightOpen;
                 previousRightTime = elapsedTime.milliseconds();
+                previousRightAutoTime = elapsedTime.milliseconds();
+            }
+            if(elapsedTime.milliseconds() - previousRightAutoTime > 2000 && !isRightOpen){
+                isRightOpen = false;
+                robot.rightServoClose();
             }
 
             if (gamepad1.left_bumper && (elapsedTime.milliseconds() - previousLiftTime > cooldownTime)) {

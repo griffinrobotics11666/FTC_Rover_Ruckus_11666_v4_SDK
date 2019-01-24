@@ -160,8 +160,7 @@ public class Depot extends LinearOpMode {
 
         waitForStart();
 
-//        robot.lift(1);
-//        robot.liftServoOpen();
+
         int goldPosition = sampleMove4();
         robot.gyroMove(-23,1);
         robot.turn(-90,1);

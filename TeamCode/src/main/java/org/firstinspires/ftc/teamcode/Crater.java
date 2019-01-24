@@ -229,9 +229,9 @@ public class Crater extends LinearOpMode{
 //        robot.imu.startAccelerationIntegration(new Position(), new Velocity(), 1000);
 
         //TODO must lower the robot and take out the servo
-//        robot.lift(1);
-//        sleep(2000);
-//        robot.liftServoOpen();
+        robot.lift(1);
+        sleep(2000);
+        robot.liftServoOpen();
 
 
         int goldLocation = sampleMove4();
