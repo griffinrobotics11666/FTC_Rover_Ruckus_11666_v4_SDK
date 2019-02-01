@@ -153,7 +153,7 @@ public class Crater extends LinearOpMode{
     }
     public int sampleMove4(){
         int goldLocation;
-        double centerSpaceAngle = 10;
+        double centerSpaceAngle = 15;
         double strafeDistance = 14.5;
         double forwardMovement = 13;
         double movementSpeed = 1;
@@ -230,12 +230,13 @@ public class Crater extends LinearOpMode{
 
         //TODO must lower the robot and take out the servo
         robot.lift(1);
-        sleep(2000);
         robot.liftServoOpen();
+        sleep(1000);
 
 
         int goldLocation = sampleMove4();
         robot.detector.disable();
+//        robot.gyroMove(-20 ,1);
         robot.turn(-90,1);
         if(goldLocation == -1) {
             robot.gyroMove(29, 1);
@@ -255,7 +256,11 @@ public class Crater extends LinearOpMode{
         robot.markerServoClose();
         robot.gyroMove(-5,1);
         robot.turn(-45,1);
-        robot.gyroMove(-70,1);
+        robot.gyroMove(-45,1);//-70
+
+//        |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+
+//        THIS IS OLD CODE!!!!!!!!!!
 
 //        if (goldLocation == 1){
 //            robot.gyroMove(60,1);

@@ -96,7 +96,7 @@ public class Depot extends LinearOpMode {
         double forwardMovement = 13;
         double movementSpeed = 1;
         double strafeSpeed = 1;
-        double turnSpeed = .5;
+        double turnSpeed = .4;
         double turningSpeed = 1;
         robot.gyroMove(-14, 1);
         double startAngle = robot.getCurrentAngle();
@@ -160,6 +160,9 @@ public class Depot extends LinearOpMode {
 
         waitForStart();
 
+        robot.lift(1);
+        robot.liftServoOpen();
+
 
         int goldPosition = sampleMove4();
         robot.gyroMove(-23,1);
@@ -189,7 +192,7 @@ public class Depot extends LinearOpMode {
         if (goldPosition == -1){
             robot.gyroMove(3,1);
         }
-        robot.gyroMove(58,1);
+        robot.gyroMove(29,1);//58
 
         robot.detector.disable();
 
@@ -198,7 +201,5 @@ public class Depot extends LinearOpMode {
 //        robot.markerServoClose();
 //        robot.gyroMove(20,1);
 //        robot.turn(290,1);
-
-        //strafe?
     }
 }

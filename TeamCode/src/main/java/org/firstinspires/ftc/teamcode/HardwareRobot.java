@@ -58,8 +58,8 @@ public class HardwareRobot {
 
     DigitalChannel button;
 
-    public DistanceSensor sensorRangeFront;
-    public DistanceSensor sensorRangeBack;
+//    public DistanceSensor sensorRangeFront;
+//    public DistanceSensor sensorRangeBack;
     public  Servo servo = null;
     public boolean ishome = true;
     BNO055IMU imu;
@@ -70,7 +70,8 @@ public class HardwareRobot {
     public boolean isTop = false;
 
     public GoldAlignDetector detector;
-    int centerValue = 290;
+    //CENTER VALUE 328!
+    int centerValue = 330;
 
 
 
@@ -111,8 +112,8 @@ public class HardwareRobot {
         feeder = hwMap.get(DcMotor.class, "feeder");
 
 
-        sensorRangeFront = hwMap.get(DistanceSensor.class, "sensor_range_front");
-        sensorRangeBack = hwMap.get(DistanceSensor.class, "sensor_range_back");
+//        sensorRangeFront = hwMap.get(DistanceSensor.class, "sensor_range_front");
+//        sensorRangeBack = hwMap.get(DistanceSensor.class, "sensor_range_back");
 
 
         //button
@@ -199,7 +200,7 @@ public class HardwareRobot {
         detector.useDefaults();
 
         // Optional Tuning
-        detector.alignSize = 150; // How wide (in pixels) is the range in which the gold object will be aligned. (Represented by green bars in the preview)
+        detector.alignSize = 60; // How wide (in pixels) is the range in which the gold object will be aligned. (Represented by green bars in the preview)
         detector.alignPosOffset = 0; // How far from center frame to offset this alignment zone.
         detector.downscale = 0.4; // How much to downscale the input frames
 
@@ -234,26 +235,41 @@ public class HardwareRobot {
 
     }
 
+    //1 is Run with Encoder; 2 is running without encoder
+    public void wheelSetMode(int mode){
+        leftBack.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        rightBack.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        leftFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        rightFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+        if(mode == 1){
+            leftBack.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            rightBack.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            leftFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            rightFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+            leftBack.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            rightBack.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            leftFront.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            rightFront.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        }
+        if(mode == 2){
+            leftBack.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+            rightBack.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+            leftFront.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+            rightFront.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        }
+
+
+    }
+
     public void move(double distance, double speed) {
         int newLeftFrontTarget;
         int newRightBackTarget;
         int newRightFrontTarget;
         int newLeftBackTarget;
 
-        leftBack.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        rightBack.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        leftFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        rightFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-
-        leftBack.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        rightBack.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        leftFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        rightFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-
-        leftBack.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        rightBack.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        leftFront.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        rightFront.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        wheelSetMode(1);
 
         //find how many encoder counts the motor is at, then add the distance to it
         newLeftFrontTarget = leftFront.getCurrentPosition() + (int)(distance * constants.getTICKS_PER_INCH_40());
@@ -293,15 +309,7 @@ public class HardwareRobot {
 // COUNTER CLOCKWISE IS POSITIVE
 
     public void turn(double angle, double speed) {
-        leftBack.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        rightBack.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        leftFront.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        rightFront.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-
-        leftFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        rightFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        leftBack.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        rightBack.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        wheelSetMode(2);
 
         angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
 
@@ -380,32 +388,32 @@ public class HardwareRobot {
         stopRobot();
     }
 
-    public double getFrontDistance(){
-        double distanceFront=0;
-
-        int count = 10;
-
-        for (int i = 0; i < count ; i++) {
-            distanceFront =+ sensorRangeFront.getDistance(DistanceUnit.INCH);
-        }
-        distanceFront = distanceFront / count;
-
-//        return distanceFront;
-        return sensorRangeFront.getDistance(DistanceUnit.INCH);
-    }
-    public double getBackDistance(){
-        double distanceBack=0;
-
-        int count = 10;
-
-        for (int i = 0; i < count ; i++) {
-            distanceBack =+ sensorRangeBack.getDistance(DistanceUnit.INCH);
-        }
-        distanceBack = distanceBack / count;
-
-//        return distanceBack;
-        return sensorRangeBack.getDistance(DistanceUnit.INCH);
-    }
+//    public double getFrontDistance(){
+//        double distanceFront=0;
+//
+//        int count = 10;
+//
+//        for (int i = 0; i < count ; i++) {
+//            distanceFront =+ sensorRangeFront.getDistance(DistanceUnit.INCH);
+//        }
+//        distanceFront = distanceFront / count;
+//
+////        return distanceFront;
+//        return sensorRangeFront.getDistance(DistanceUnit.INCH);
+//    }
+//    public double getBackDistance(){
+//        double distanceBack=0;
+//
+//        int count = 10;
+//
+//        for (int i = 0; i < count ; i++) {
+//            distanceBack =+ sensorRangeBack.getDistance(DistanceUnit.INCH);
+//        }
+//        distanceBack = distanceBack / count;
+//
+////        return distanceBack;
+//        return sensorRangeBack.getDistance(DistanceUnit.INCH);
+//    }
 
     public void strafe(double distance, double speed){
         int newLeftFrontTarget;
@@ -413,20 +421,7 @@ public class HardwareRobot {
         int newRightFrontTarget;
         int newLeftBackTarget;
 
-        leftBack.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        rightBack.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        leftFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        rightFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-
-        leftBack.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        rightBack.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        leftFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        rightFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-
-        leftBack.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        rightBack.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        leftFront.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        rightFront.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        wheelSetMode(1);
 
         newLeftFrontTarget = leftFront.getCurrentPosition() + (int)(distance * constants.getStrafe());
         newLeftBackTarget = leftBack.getCurrentPosition() - (int)(distance * constants.getStrafe());
@@ -625,20 +620,8 @@ public class HardwareRobot {
         int newRightFrontTarget;
         int newLeftBackTarget;
 
-        leftBack.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        rightBack.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        leftFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        rightFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        wheelSetMode(1);
 
-        leftBack.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        rightBack.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        leftFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        rightFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-
-        leftBack.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        rightBack.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        leftFront.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        rightFront.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         //find how many encoder counts the motor is at, then add the distance to it
         newLeftFrontTarget = leftFront.getCurrentPosition() + (int)(distance * constants.getTICKS_PER_INCH_40());
         newLeftBackTarget = leftBack.getCurrentPosition() + (int)(distance * constants.getTICKS_PER_INCH_40());
@@ -842,35 +825,35 @@ public class HardwareRobot {
         middleArm.setPower(0);
 
     }
-    public void wallAlign(){
-        double turnSpeed = .5;
-        while (Math.abs(getFrontDistance() - getBackDistance()) > .5){
-            if (getFrontDistance() - getBackDistance() < 0){
-                leftFront.setPower(turnSpeed);
-                leftBack.setPower(turnSpeed);
-                rightBack.setPower(-turnSpeed);
-                rightFront.setPower(-turnSpeed);
-            }else {
-                leftBack.setPower(-turnSpeed);
-                leftFront.setPower(-turnSpeed);
-                rightFront.setPower(turnSpeed);
-                rightBack.setPower(turnSpeed);
-            }
-            telemetry.addData("Back Distance", getBackDistance());
-            telemetry.addData("Front Distance", getFrontDistance());
-            telemetry.update();
-        }
-        stopRobot();
-    }
-    public void moveToWall(double speed){
-        double distance = 2;
-        while (getFrontDistance() > distance || getBackDistance() > distance){
-            leftFront.setPower(Math.abs(speed));
-            rightFront.setPower(Math.abs(speed));
-            leftBack.setPower(Math.abs(-speed));
-            rightBack.setPower(Math.abs(-speed));
-        }
-        stopRobot();
-    }
+//    public void wallAlign(){
+//        double turnSpeed = .5;
+//        while (Math.abs(getFrontDistance() - getBackDistance()) > .42){
+//            if (getFrontDistance() - getBackDistance() < 0){
+//                leftFront.setPower(turnSpeed);
+//                leftBack.setPower(turnSpeed);
+//                rightBack.setPower(-turnSpeed);
+//                rightFront.setPower(-turnSpeed);
+//            }else {
+//                leftBack.setPower(-turnSpeed);
+//                leftFront.setPower(-turnSpeed);
+//                rightFront.setPower(turnSpeed);
+//                rightBack.setPower(turnSpeed);
+//            }
+//            telemetry.addData("Back Distance", getBackDistance());
+//            telemetry.addData("Front Distance", getFrontDistance());
+//            telemetry.update();
+//        }
+//        stopRobot();
+//    }
+//    public void moveToWall(double speed){
+//        double distance = 2;
+//        while (getFrontDistance() > distance || getBackDistance() > distance){
+//            leftFront.setPower(Math.abs(speed));
+//            rightFront.setPower(Math.abs(speed));
+//            leftBack.setPower(Math.abs(-speed));
+//            rightBack.setPower(Math.abs(-speed));
+//        }
+//        stopRobot();
+//    }
 
 }
