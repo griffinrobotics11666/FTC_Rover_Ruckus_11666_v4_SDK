@@ -5,6 +5,7 @@ import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.util.Range;
 
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
@@ -101,16 +102,29 @@ public class Depot extends LinearOpMode {
         robot.gyroMove(-14, 1);
         double startAngle = robot.getCurrentAngle();
         robot.turn(60,turningSpeed);
+        double goldXPosition = 0;
 
 
         //TODO if not see gold, then stop
-        while(!robot.detector.getAligned()){
+        while(Math.abs((robot.centerValue) - robot.detector.getXPosition()) > 5){
+
+            if (!robot.detector.isFound()){
+                goldXPosition = 0;
+            }else {
+                goldXPosition = robot.detector.getXPosition();
+            }
+
+            turnSpeed = Range.scale(Math.abs((robot.centerValue - goldXPosition)/robot.centerValue),0,1,.15,.5);
+//            turnSpeed = Range.clip(Math.abs((robot.centerValue - robot.detector.getXPosition())/robot.centerValue),.2,.5);
+            if((robot.centerValue - goldXPosition)/robot.centerValue < 0){
+                turnSpeed = -turnSpeed;
+            }
+
+
             robot.leftBack.setPower(turnSpeed);
             robot.leftFront.setPower(turnSpeed);
             robot.rightBack.setPower(-turnSpeed);
             robot.rightFront.setPower(-turnSpeed);
-            telemetry.addData("Current angle", robot.getCurrentAngle());
-            telemetry.update();
         }
         robot.stopRobot();
 
@@ -193,6 +207,11 @@ public class Depot extends LinearOpMode {
             robot.gyroMove(3,1);
         }
         robot.gyroMove(29,1);//58
+
+        robot.isTop = true;
+        robot.detector.disable();
+        robot.liftServoClose();
+        robot.lift(1);
 
         robot.detector.disable();
 

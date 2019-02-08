@@ -6,6 +6,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
+import com.qualcomm.robotcore.util.Range;
 
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
@@ -23,7 +24,7 @@ import static java.lang.Thread.sleep;
 
 
 @Autonomous (name="Autonomous Test", group="Autonomous")
-public class WallAlignTest extends LinearOpMode{
+public class AutonomousTest extends LinearOpMode{
 
     private ElapsedTime elapsedTime = new ElapsedTime();
     HardwareRobot robot = new HardwareRobot(telemetry);
@@ -42,8 +43,6 @@ public class WallAlignTest extends LinearOpMode{
         double startAngle = robot.getCurrentAngle();
         robot.turn(60,turningSpeed);
 
-
-        //TODO if not see gold, then stop
         while(!robot.detector.getAligned()){
             if(robot.detector.getXPosition() < robot.centerValue) {
                 robot.leftBack.setPower(turnSpeed);
@@ -103,34 +102,53 @@ public class WallAlignTest extends LinearOpMode{
     public int sampleMove5(){
         int goldLocation;
         double centerSpaceAngle = 15;
-        double strafeDistance = 14.5;
         double forwardMovement = 13;
         double movementSpeed = 1;
-        double strafeSpeed = 1;
         double turnSpeed = .5;
         double turningSpeed = 1;
-        robot.gyroMove(-14, 1);
+        double speed = 0;
+        double goldXPosition = 0;
+        robot.gyroMove(-8, 1);
+
         double startAngle = robot.getCurrentAngle();
 
         robot.turn(60,turningSpeed);
 
-
-        //TODO if not see gold, then stop
-        while(!robot.detector.getAligned() || Math.abs((robot.centerValue) - robot.detector.getXPosition()) > 5){
-            if((robot.centerValue) - robot.detector.getXPosition() > 5) {
-                robot.leftBack.setPower(turnSpeed);
-                robot.leftFront.setPower(turnSpeed);
-                robot.rightBack.setPower(-turnSpeed);
-                robot.rightFront.setPower(-turnSpeed);
-            }else{
-                robot.leftBack.setPower(-turnSpeed/2);
-                robot.leftFront.setPower(-turnSpeed/2);
-                robot.rightBack.setPower(turnSpeed/2);
-                robot.rightFront.setPower(turnSpeed/2);
+        while(Math.abs((robot.centerValue) - goldXPosition) > 5){
+            if (!robot.detector.isFound()){
+                goldXPosition = 0;
+            }else {
+                goldXPosition = robot.detector.getXPosition();
             }
+
+            turnSpeed = Range.scale(Math.abs((robot.centerValue - goldXPosition)/robot.centerValue),0,1,.15,.5);
+//            turnSpeed = Range.clip(Math.abs((robot.centerValue - robot.detector.getXPosition())/robot.centerValue),.2,.5);
+            if((robot.centerValue - goldXPosition)/robot.centerValue < 0){
+                turnSpeed = -turnSpeed;
+            }
+
+
+
+            robot.leftBack.setPower(turnSpeed);
+            robot.leftFront.setPower(turnSpeed);
+            robot.rightBack.setPower(-turnSpeed);
+            robot.rightFront.setPower(-turnSpeed);
+
+//            if((robot.centerValue) - robot.detector.getXPosition() > 0) {
+//                robot.leftBack.setPower(turnSpeed);
+//                robot.leftFront.setPower(turnSpeed);
+//                robot.rightBack.setPower(-turnSpeed);
+//                robot.rightFront.setPower(-turnSpeed);
+//            }else{
+//                robot.leftBack.setPower(-turnSpeed/1.5);
+//                robot.leftFront.setPower(-turnSpeed/1.5);
+//                robot.rightBack.setPower(turnSpeed/1.5);
+//                robot.rightFront.setPower(turnSpeed/1.5);
+//            }
             telemetry.addData("Current angle", robot.getCurrentAngle());
             telemetry.update();
         }
+        robot.detector.disable();
         robot.stopRobot();
 
 
@@ -154,16 +172,36 @@ public class WallAlignTest extends LinearOpMode{
         telemetry.addData("Difference Angle", differenceAngle);
         telemetry.addData("gold location", goldLocation);
         telemetry.update();
+        double finalAngle = robot.getCurrentAngle();
 
 
         if (goldLocation == 0){
-            robot.gyroMove(-10,1);
-            robot.gyroMove(10,1);
-        }else {
-            robot.gyroMove(-24,1);
-            robot.gyroMove(24,1);
+            robot.gyroMove(-17,movementSpeed);
+//            robot.turn(15,.4);
+//            robot.gyroMove(-3,1);
+            robot.gyroMove(10,movementSpeed);
+            robot.turn(-differenceAngle + 90,.3);
+            robot.gyroMove(47,1);
+            robot.turn(-48,.5);
+//            robot.turn(finalAngle - startAngle - 45,.5);
+//            finalAngle = robot.getCurrentAngle();
+//            robot.turn(finalAngle - startAngle - 45,.5);
+//            robot.gyroMove(-25,1);
+//            robot.strafe(-25,1);
+//            robot.gyroMove(-5,1);
+//            robot.strafe(-8,1);
+            robot.gyroMove(-26,1);
+        }else if (goldLocation == -1) {
+            robot.turn(5,.3);
+            robot.gyroMove(-29,movementSpeed);
+//            robot.gyroMove(20,movementSpeed);
         }
-        robot.turn(-differenceAngle,.5);  //robot is turned to straight
+        else{
+            robot.turn(-5,.3);
+            robot.gyroMove(-29,movementSpeed);
+        }
+
+//        robot.turn(-differenceAngle - 90,1);  //robot is turned to straight
 
         return goldLocation;
     }
@@ -178,13 +216,15 @@ public class WallAlignTest extends LinearOpMode{
         waitForStart();
         robot.lift(1);
         robot.liftServoOpen();
-        sleep(1000);
+//        sleep(1000);
 
 
         int goldLocation = sampleMove5();
-        robot.detector.disable();
-        robot.turn(-90,1);
-        robot.gyroMove(29 + 14.5,1);
+//        robot.isTop = true;
+//        robot.detector.disable();
+//        robot.liftServoClose();
+//        robot.lift(1);
+//        robot.gyroMove(29 + 14.5,1);
 
         telemetry.addData("current angle", robot.getCurrentAngle());
         telemetry.update();

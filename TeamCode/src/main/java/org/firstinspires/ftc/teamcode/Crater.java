@@ -6,6 +6,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
+import com.qualcomm.robotcore.util.Range;
 
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
@@ -31,7 +32,7 @@ public class Crater extends LinearOpMode{
     Orientation angles;
 
 
-    //TODO Can we speed this up?
+
     public int sampleMove2(){
 
         //drive forward to get away from
@@ -165,6 +166,7 @@ public class Crater extends LinearOpMode{
         robot.turn(60,turningSpeed);
 
 
+
         //TODO if not see gold, then stop
         while(!robot.detector.getAligned()){
             robot.leftBack.setPower(turnSpeed);
@@ -215,6 +217,91 @@ public class Crater extends LinearOpMode{
 
         return goldLocation;
     }
+    public int sampleMove5(){
+        int goldLocation;
+        double centerSpaceAngle = 15;
+        double forwardMovement = 13;
+        double movementSpeed = 1;
+        double turnSpeed = .5;
+        double turningSpeed = 1;
+        double speed = 0;
+        double goldXPosition = 0;
+        robot.gyroMove(-8, 1);
+
+        double startAngle = robot.getCurrentAngle();
+
+        robot.turn(60,turningSpeed);
+
+
+        //TODO if not see gold, then stop
+        while(Math.abs((robot.centerValue) - robot.detector.getXPosition()) > 5){
+
+            if (!robot.detector.isFound()){
+                goldXPosition = 0;
+            }else {
+                goldXPosition = robot.detector.getXPosition();
+            }
+
+            turnSpeed = Range.scale(Math.abs((robot.centerValue - goldXPosition)/robot.centerValue),0,1,.15,.5);
+//            turnSpeed = Range.clip(Math.abs((robot.centerValue - robot.detector.getXPosition())/robot.centerValue),.2,.5);
+            if((robot.centerValue - goldXPosition)/robot.centerValue < 0){
+                turnSpeed = -turnSpeed;
+            }
+
+
+
+
+            robot.leftBack.setPower(turnSpeed);
+            robot.leftFront.setPower(turnSpeed);
+            robot.rightBack.setPower(-turnSpeed);
+            robot.rightFront.setPower(-turnSpeed);
+            telemetry.addData("Current angle", robot.getCurrentAngle());
+            telemetry.update();
+        }
+        robot.detector.disable();
+        robot.stopRobot();
+
+
+        double newAngle = robot.getNewAngle();
+        double differenceAngle = newAngle - startAngle;
+
+
+        if (differenceAngle > centerSpaceAngle){
+            //then on left
+            goldLocation = -1;
+        }
+        else if (differenceAngle < -centerSpaceAngle){
+            // then on right
+            goldLocation = 1;
+        }else {
+            //middle!
+            goldLocation = 0;
+        }
+
+        telemetry.addData("newAngle",newAngle);
+        telemetry.addData("Difference Angle", differenceAngle);
+        telemetry.addData("gold location", goldLocation);
+        telemetry.update();
+        double finalAngle = robot.getCurrentAngle();
+
+
+        if (goldLocation == 0){
+            robot.gyroMove(-17,movementSpeed);
+            robot.gyroMove(10,movementSpeed);
+            robot.turn(-differenceAngle + 90,.3);
+            robot.gyroMove(47,1);
+            robot.turn(-48,.5);
+            robot.gyroMove(-26,1);
+        }else if (goldLocation == -1) {
+            robot.turn(5,.3);
+            robot.gyroMove(-29,movementSpeed);
+        }
+        else{
+            robot.turn(-5,.3);
+            robot.gyroMove(-29,movementSpeed);
+        }
+        return goldLocation;
+    }
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -229,34 +316,36 @@ public class Crater extends LinearOpMode{
 //        robot.imu.startAccelerationIntegration(new Position(), new Velocity(), 1000);
 
         //TODO must lower the robot and take out the servo
+        waitForStart();
         robot.lift(1);
         robot.liftServoOpen();
-        sleep(1000);
+//        sleep(1000);
 
 
-        int goldLocation = sampleMove4();
-        robot.detector.disable();
-//        robot.gyroMove(-20 ,1);
-        robot.turn(-90,1);
-        if(goldLocation == -1) {
-            robot.gyroMove(29, 1);
-        }
-        if(goldLocation == 0){
-            robot.gyroMove(29 + 14.5,1);
-        }
-        if(goldLocation == 1){
-            robot.gyroMove(29 + 14.5 + 14.5,1);
-        }
-        robot.turn(45,1);
-        robot.gyroMove(44,1);
-        robot.turn(45,1);
-        robot.gyroMove(5,1);
-        robot.markerServoOpen();
-        sleep(1500);
-        robot.markerServoClose();
-        robot.gyroMove(-5,1);
-        robot.turn(-45,1);
-        robot.gyroMove(-45,1);//-70
+        int goldLocation = sampleMove5();
+//        int goldLocation = sampleMove4();
+//        robot.detector.disable();
+////        robot.gyroMove(-20 ,1);
+//        robot.turn(-90,1);
+//        if(goldLocation == -1) {
+//            robot.gyroMove(29, 1);
+//        }
+//        if(goldLocation == 0){
+//            robot.gyroMove(29 + 14.5,1);
+//        }
+//        if(goldLocation == 1){
+//            robot.gyroMove(29 + 14.5 + 14.5,1);
+//        }
+//        robot.turn(45,1);
+//        robot.gyroMove(44,1);
+//        robot.turn(45,1);
+//        robot.gyroMove(5,1);
+//        robot.markerServoOpen();
+//        sleep(1500);
+//        robot.markerServoClose();
+//        robot.gyroMove(-5,1);
+//        robot.turn(-45,1);
+//        robot.gyroMove(-45,1);//-70
 
 //        |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 

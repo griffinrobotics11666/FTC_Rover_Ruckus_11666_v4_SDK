@@ -37,10 +37,10 @@ public class RobotConstants {
         return .647;
     } //.613
     public double getRightServoOpen(){
-        return .71;
+        return .59;
     }//.25
     public double getRightServoClose(){
-        return .88;
+        return .37 ;
     }//.13
     public double getArm(){
         return 100;

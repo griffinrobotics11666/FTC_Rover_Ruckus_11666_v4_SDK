@@ -71,8 +71,8 @@ public class HardwareRobot {
 
     public GoldAlignDetector detector;
     //CENTER VALUE 328!
-    int centerValue = 330;
-
+    int centerValue = 328;
+//    double centerValue = detector.getAlignX();
 
 
 
@@ -186,13 +186,23 @@ public class HardwareRobot {
 
         //gyro stuff
         BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
+        parameters.mode = BNO055IMU.SensorMode.IMU;
         parameters.angleUnit = BNO055IMU.AngleUnit.DEGREES;
+        parameters.accelUnit = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
         parameters.calibrationDataFile = "BNO055IMUCalibration.json";
-        parameters.loggingEnabled = true;
-        parameters.loggingTag = "IMU";
         parameters.accelerationIntegrationAlgorithm = new JustLoggingAccelerationIntegrator();
+        parameters.loggingEnabled = false;
+        parameters.loggingTag = "IMU";
         imu = hwMap.get(BNO055IMU.class, "imu");
         imu.initialize(parameters);
+//        BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
+//        parameters.angleUnit = BNO055IMU.AngleUnit.DEGREES;
+//        parameters.accelUnit = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
+//        parameters.calibrationDataFile = "AdafruitIMUCalibration.json";
+//        parameters.loggingEnabled = true;
+//        parameters.loggingTag = "IMU";
+//        imu = hwMap.get(BNO055IMU.class, "imu");
+//        imu.initialize(parameters);
 
         //detector stuff
         detector = new GoldAlignDetector();
@@ -218,15 +228,7 @@ public class HardwareRobot {
     //Methods
 
     public void stopRobot() {
-        leftBack.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        rightBack.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        leftFront.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        rightFront.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-
-        rightBack.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        rightFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        leftFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        leftBack.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        wheelSetMode(2);
 
         leftBack.setPower(0);
         leftFront.setPower(0);
@@ -315,7 +317,7 @@ public class HardwareRobot {
 
         double initialAngle = angles.firstAngle;
         double motorPower;
-        double minMotorPower = 0.5 ;
+        double minMotorPower = 0.3 ;
         double powerScaleFactor;
         double targetAngle;
         double currentAngle;
